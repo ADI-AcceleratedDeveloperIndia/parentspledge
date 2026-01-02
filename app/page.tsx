@@ -1,65 +1,421 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect, FormEvent } from 'react';
+import { PledgeFormData, pledgeSchema } from '@/lib/validations';
+import { TELANGANA_DISTRICTS } from '@/lib/constants';
+import { translations, type Language } from '@/lib/translations';
+import CertificateGenerator from '@/components/CertificateGenerator';
+import LanguageToggle from '@/components/LanguageToggle';
+import AudioGuide from '@/components/AudioGuide';
 
 export default function Home() {
+  const [language, setLanguage] = useState<Language>('en');
+  const [formData, setFormData] = useState<Partial<PledgeFormData>>({
+    childName: '',
+    parentName: '',
+    institutionName: '',
+    district: undefined,
+    language: 'en',
+  });
+  const [errors, setErrors] = useState<Partial<Record<keyof PledgeFormData | '_form', string>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [submittedData, setSubmittedData] = useState<PledgeFormData | null>(null);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const [hasStartedPledging, setHasStartedPledging] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+
+  const t = translations[language];
+
+  // Fetch visitor count on mount
+  useEffect(() => {
+    fetch('/api/visitors/increment')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.count !== undefined) {
+          setVisitorCount(data.count);
+        }
+      })
+      .catch(() => {
+        // Silently fail - don't block the page
+      });
+  }, []);
+
+  const handleInputChange = (field: keyof PledgeFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleLanguageChange = (lang: Language) => {
+    setLanguage(lang);
+    setFormData((prev) => ({ ...prev, language: lang }));
+  };
+
+  const handleStartPledging = () => {
+    setHasStartedPledging(true);
+    
+    // Play audio using browser Text-to-Speech
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(t.fullPledgeText);
+      utterance.lang = language === 'te' ? 'te-IN' : 'en-US';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      utterance.onstart = () => setIsPlayingAudio(true);
+      utterance.onend = () => setIsPlayingAudio(false);
+      utterance.onerror = () => setIsPlayingAudio(false);
+
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      // Client-side validation
+      const validatedData = pledgeSchema.parse({
+        ...formData,
+        language,
+      });
+
+      // Submit to API
+      const response = await fetch('/api/pledges', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(validatedData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit pledge');
+      }
+
+      // Success - show certificate
+      setSubmittedData(validatedData);
+      setShowCertificate(true);
+    } catch (error: any) {
+      if (error.issues) {
+        // Zod validation errors
+        const zodErrors: Partial<Record<keyof PledgeFormData, string>> = {};
+        error.issues.forEach((err: any) => {
+          if (err.path) {
+            zodErrors[err.path[0] as keyof PledgeFormData] = err.message;
+          }
+        });
+        setErrors(zodErrors);
+      } else {
+        setErrors({ _form: error.message || t.error });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (showCertificate && submittedData) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: '#F5F9FD' }}>
+        <div className="max-w-4xl mx-auto py-8 px-4">
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl font-bold mb-4" style={{ color: '#123C66' }}>{t.success}</h1>
+            <button
+              onClick={() => {
+                setShowCertificate(false);
+                setFormData({
+                  childName: '',
+                  parentName: '',
+                  institutionName: '',
+                  district: undefined,
+                  language: 'en',
+                });
+                setSubmittedData(null);
+              }}
+              className="underline font-medium"
+              style={{ color: '#1F6FB2' }}
+            >
+              Submit Another Pledge
+            </button>
+          </div>
+          <CertificateGenerator data={submittedData} language={language} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen" style={{ backgroundColor: '#FFFFFF' }}>
+      {/* Header */}
+      <header className="border-b" style={{ backgroundColor: '#FFFFFF', borderColor: '#D6E2EE' }}>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Logo Placeholders */}
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1F6FB2' }}>
+                LOGO_1
+              </div>
+              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1F6FB2' }}>
+                LOGO_2
+              </div>
+              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1F6FB2' }}>
+                LOGO_3
+              </div>
+            </div>
+            <LanguageToggle currentLanguage={language} onLanguageChange={handleLanguageChange} />
+          </div>
+        </div>
+      </header>
+
+      {/* Leadership Photos Section */}
+      <section className="border-b py-6" style={{ backgroundColor: '#FFFFFF', borderColor: '#D6E2EE' }}>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-wrap justify-center gap-6">
+            <div className="text-center">
+              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#D6E2EE', color: '#4A4A4A' }}>
+                CM_PHOTO
+              </div>
+              <p className="text-xs" style={{ color: '#4A4A4A' }}>Chief Minister</p>
+            </div>
+            <div className="text-center">
+              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#D6E2EE', color: '#4A4A4A' }}>
+                MINISTER_PHOTO
+              </div>
+              <p className="text-xs" style={{ color: '#4A4A4A' }}>Transport Minister</p>
+            </div>
+            <div className="text-center">
+              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#D6E2EE', color: '#4A4A4A' }}>
+                OFFICIAL_PHOTO
+              </div>
+              <p className="text-xs" style={{ color: '#4A4A4A' }}>Official</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        {/* Pledge Content Section - Always Visible */}
+        <div className="rounded-lg p-6 md:p-8" style={{ backgroundColor: '#F5F9FD', border: '1px solid #D6E2EE' }}>
+          <div className="text-center mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#123C66' }}>{t.title}</h1>
+            <p className="text-lg" style={{ color: '#4A4A4A' }}>{t.subtitle}</p>
+          </div>
+
+          {/* Pledge Text Display */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#123C66' }}>
+              {language === 'te' ? 'తల్లిదండ్రుల హామీ పత్రం' : 'Parents Pledge'}
+            </h2>
+            <div 
+              className="text-base leading-relaxed p-6 rounded-lg"
+              style={{ 
+                backgroundColor: '#FFFFFF', 
+                border: '1px solid #D6E2EE',
+                color: '#123C66',
+                minHeight: '200px'
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <p className="whitespace-pre-line">{t.fullPledgeText}</p>
+            </div>
+          </div>
+
+          {/* Start Pledging Button */}
+          {!hasStartedPledging && (
+            <div className="text-center">
+              <button
+                onClick={handleStartPledging}
+                disabled={isPlayingAudio}
+                className="px-8 py-4 text-white rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                style={{ backgroundColor: isPlayingAudio ? '#5DA9E9' : '#1F6FB2' }}
+              >
+                {isPlayingAudio ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {language === 'te' ? 'ఆడియో ప్లే అవుతోంది...' : 'Playing Audio...'}
+                  </span>
+                ) : (
+                  t.startPledging
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Audio Playing Indicator */}
+          {isPlayingAudio && (
+            <div className="mt-4 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#FFFFFF', border: '1px solid #D6E2EE' }}>
+                <svg className="animate-pulse h-5 w-5" style={{ color: '#1F6FB2' }} fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                </svg>
+                <span style={{ color: '#123C66' }}>
+                  {language === 'te' ? 'ఆడియో ప్లే అవుతోంది...' : 'Audio is playing...'}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Form Section - Shows after clicking Start Pledging */}
+        {hasStartedPledging && (
+          <div className="rounded-lg p-6 md:p-8" style={{ backgroundColor: '#F5F9FD', border: '1px solid #D6E2EE' }}>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold mb-2" style={{ color: '#123C66' }}>{t.formTitle}</h2>
+            </div>
+
+            <div className="mb-6 flex justify-center">
+              <AudioGuide language={language} text={t.formTitle} />
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Child Name */}
+            <div>
+              <label htmlFor="childName" className="block text-sm font-medium mb-2" style={{ color: '#123C66' }}>
+                {t.childName} <span style={{ color: '#E3B341' }}>*</span>
+              </label>
+              <input
+                type="text"
+                id="childName"
+                value={formData.childName || ''}
+                onChange={(e) => handleInputChange('childName', e.target.value)}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{
+                  border: errors.childName ? '2px solid #E3B341' : '1px solid #D6E2EE',
+                  backgroundColor: '#FFFFFF',
+                  color: '#123C66',
+                  '--tw-ring-color': '#1F6FB2'
+                } as React.CSSProperties}
+                required
+              />
+              {errors.childName && (
+                <p className="mt-1 text-sm" style={{ color: '#E3B341' }}>{errors.childName}</p>
+              )}
+            </div>
+
+            {/* Parent Name */}
+            <div>
+              <label htmlFor="parentName" className="block text-sm font-medium mb-2" style={{ color: '#123C66' }}>
+                {t.parentName} <span style={{ color: '#E3B341' }}>*</span>
+              </label>
+              <input
+                type="text"
+                id="parentName"
+                value={formData.parentName || ''}
+                onChange={(e) => handleInputChange('parentName', e.target.value)}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{
+                  border: errors.parentName ? '2px solid #E3B341' : '1px solid #D6E2EE',
+                  backgroundColor: '#FFFFFF',
+                  color: '#123C66',
+                  '--tw-ring-color': '#1F6FB2'
+                } as React.CSSProperties}
+                required
+              />
+              {errors.parentName && (
+                <p className="mt-1 text-sm" style={{ color: '#E3B341' }}>{errors.parentName}</p>
+              )}
+            </div>
+
+            {/* Institution Name */}
+            <div>
+              <label
+                htmlFor="institutionName"
+                className="block text-sm font-medium mb-2"
+                style={{ color: '#123C66' }}
+              >
+                {t.institutionName} <span style={{ color: '#E3B341' }}>*</span>
+              </label>
+              <input
+                type="text"
+                id="institutionName"
+                value={formData.institutionName || ''}
+                onChange={(e) => handleInputChange('institutionName', e.target.value)}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{
+                  border: errors.institutionName ? '2px solid #E3B341' : '1px solid #D6E2EE',
+                  backgroundColor: '#FFFFFF',
+                  color: '#123C66',
+                  '--tw-ring-color': '#1F6FB2'
+                } as React.CSSProperties}
+                required
+              />
+              {errors.institutionName && (
+                <p className="mt-1 text-sm" style={{ color: '#E3B341' }}>{errors.institutionName}</p>
+              )}
+            </div>
+
+            {/* District */}
+            <div>
+              <label htmlFor="district" className="block text-sm font-medium mb-2" style={{ color: '#123C66' }}>
+                {t.district} <span style={{ color: '#E3B341' }}>*</span>
+              </label>
+              <select
+                id="district"
+                value={formData.district || ''}
+                onChange={(e) => handleInputChange('district', e.target.value)}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{
+                  border: errors.district ? '2px solid #E3B341' : '1px solid #D6E2EE',
+                  backgroundColor: '#FFFFFF',
+                  color: '#123C66',
+                  '--tw-ring-color': '#1F6FB2'
+                } as React.CSSProperties}
+                required
+              >
+                <option value="">{t.selectDistrict}</option>
+                {TELANGANA_DISTRICTS.map((district) => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
+              </select>
+              {errors.district && (
+                <p className="mt-1 text-sm" style={{ color: '#E3B341' }}>{errors.district}</p>
+              )}
+            </div>
+
+            {/* Form Error */}
+            {errors._form && (
+              <div className="rounded-lg p-4" style={{ backgroundColor: '#F5F9FD', border: '1px solid #E3B341' }}>
+                <p className="text-sm" style={{ color: '#E3B341' }}>{errors._form}</p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full text-white py-3 px-6 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+              style={{ backgroundColor: isSubmitting ? '#5DA9E9' : '#1F6FB2' }}
             >
-              Learning
-            </a>{" "}
-            center.
+              {isSubmitting ? t.generating : t.submit}
+            </button>
+          </form>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t mt-12 py-6" style={{ backgroundColor: '#FFFFFF', borderColor: '#D6E2EE' }}>
+        <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
+          <p style={{ color: '#4A4A4A' }}>
+            {t.visitorCount}: <span className="font-bold" style={{ color: '#1F6FB2' }}>{visitorCount ?? '...'}</span>
+          </p>
+          <p className="text-sm" style={{ color: '#4A4A4A' }}>
+            Admin Dashboard: <a href="/admin" className="underline font-medium" style={{ color: '#1F6FB2' }}>Click here</a>
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </footer>
     </div>
   );
 }

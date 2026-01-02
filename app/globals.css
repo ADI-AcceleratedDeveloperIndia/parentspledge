@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Telangana Transport Department Color Palette */
+  --primary-blue: #1F6FB2;
+  --navy-blue: #123C66;
+  --sky-blue: #5DA9E9;
+  --background-white: #FFFFFF;
+  --section-bg: #F5F9FD;
+  --border-color: #D6E2EE;
+  --emblem-gold: #E3B341;
+  --footer-grey: #4A4A4A;
+  
+  /* Legacy variables for compatibility */
+  --background: #FFFFFF;
+  --foreground: #123C66;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-primary-blue: var(--primary-blue);
+  --color-navy-blue: var(--navy-blue);
+  --color-sky-blue: var(--sky-blue);
+  --color-background: var(--background-white);
+  --color-section-bg: var(--section-bg);
+  --color-border: var(--border-color);
+  --color-emblem-gold: var(--emblem-gold);
+  --color-footer-grey: var(--footer-grey);
+  --color-foreground: var(--navy-blue);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Remove dark mode - government sites use light theme only */
+body {
+  background: var(--background-white);
+  color: var(--navy-blue);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Ensure sufficient contrast for mobile readability */
+button, a {
+  -webkit-tap-highlight-color: rgba(31, 111, 178, 0.2);
 }
