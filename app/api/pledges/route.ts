@@ -26,15 +26,20 @@ export async function POST(request: NextRequest) {
 
     // Generate random reference ID
     const referenceId = `RS${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    
+    // Generate random certificate number (server-side, stored in database)
+    const certificateNumber = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
     // Sanitize inputs (additional server-side sanitization)
     const sanitizedData = {
       childName: data.childName.trim().substring(0, 100),
       parentName: data.parentName.trim().substring(0, 100),
       institutionName: data.institutionName.trim().substring(0, 200),
+      standard: data.standard.trim().substring(0, 50),
       district: data.district,
       language: data.language,
       referenceId: referenceId,
+      certificateNumber: certificateNumber,
       downloadCount: 0,
       createdAt: new Date(),
     };
@@ -47,11 +52,12 @@ export async function POST(request: NextRequest) {
       // Create indexes if they don't exist (idempotent)
       await collection.createIndex({ district: 1 });
       await collection.createIndex({ createdAt: 1 });
+      await collection.createIndex({ referenceId: 1 }); // Index for download tracking
 
       const result = await collection.insertOne(sanitizedData);
 
       return NextResponse.json(
-        { success: true, id: result.insertedId, referenceId: referenceId },
+        { success: true, id: result.insertedId, referenceId: referenceId, certificateNumber: certificateNumber },
         { status: 201 }
       );
     } catch (dbError: any) {

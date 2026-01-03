@@ -8,9 +8,10 @@ interface CertificateGeneratorProps {
   data: PledgeFormData;
   language: Language;
   referenceId?: string;
+  certificateNumber?: string;
 }
 
-export default function CertificateGenerator({ data, language, referenceId }: CertificateGeneratorProps) {
+export default function CertificateGenerator({ data, language, referenceId, certificateNumber }: CertificateGeneratorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isGenerating, setIsGenerating] = useState(true);
   const t = translations[language];
@@ -118,27 +119,25 @@ export default function CertificateGenerator({ data, language, referenceId }: Ce
     photo1: PromiseSettledResult<HTMLImageElement>,
     photo2: PromiseSettledResult<HTMLImageElement>
   ) => {
-    // Ensure Logo1 and Logo3 are the same size
-    const logo1And3Size = 50 * scale; // Same size for both Logo1 and Logo3
-    const logo2BigSize = logo1And3Size * 2; // Logo2 big version is double size
-    // Ensure Photo1 and Photo2 are the same size
-    const photo1And2Size = 50 * scale; // Same size for both Photo1 and Photo2
+    // All small logos and photos should be the same size
+    const smallSize = 50 * scale; // Same size for Logo1, Logo3, Photo1, Photo2
+    const logo2BigSize = smallSize * 2; // Logo2 big version is double size
     const paddingPercent = 0.1; // 10% padding from edges
     const horizontalPadding = width * paddingPercent;
     const topY = 30 * scale; // Top edge position
     const spacing = 20 * scale; // Spacing between elements
 
-    // LEFT SIDE: Logo1 and Logo3 (same size) together
+    // LEFT SIDE: Logo1 and Logo3 (same size as photos) together
     let currentX = horizontalPadding;
     
     if (logo1.status === 'fulfilled') {
-      ctx.drawImage(logo1.value, currentX, topY, logo1And3Size, logo1And3Size);
-      currentX += logo1And3Size + spacing;
+      ctx.drawImage(logo1.value, currentX, topY, smallSize, smallSize);
+      currentX += smallSize + spacing;
     }
     
     if (logo3.status === 'fulfilled') {
-      // Logo3 same size as Logo1
-      ctx.drawImage(logo3.value, currentX, topY, logo1And3Size, logo1And3Size);
+      // Logo3 same size as Logo1, Photo1, Photo2
+      ctx.drawImage(logo3.value, currentX, topY, smallSize, smallSize);
     }
 
     // MIDDLE: Logo2 (big, double size) - centered
@@ -147,18 +146,18 @@ export default function CertificateGenerator({ data, language, referenceId }: Ce
       ctx.drawImage(logo2.value, logo2BigX, topY, logo2BigSize, logo2BigSize);
     }
 
-    // RIGHT SIDE: Photo1 and Photo2 (same size) together
-    const rightStartX = width - horizontalPadding - (photo1And2Size * 2) - spacing;
+    // RIGHT SIDE: Photo1 and Photo2 (same size as Logo1, Logo3) together
+    const rightStartX = width - horizontalPadding - (smallSize * 2) - spacing;
     let photoX = rightStartX;
     
     if (photo1.status === 'fulfilled') {
-      ctx.drawImage(photo1.value, photoX, topY, photo1And2Size, photo1And2Size);
-      photoX += photo1And2Size + spacing;
+      ctx.drawImage(photo1.value, photoX, topY, smallSize, smallSize);
+      photoX += smallSize + spacing;
     }
     
     if (photo2.status === 'fulfilled') {
-      // Photo2 same size as Photo1
-      ctx.drawImage(photo2.value, photoX, topY, photo1And2Size, photo1And2Size);
+      // Photo2 same size as Photo1, Logo1, Logo3
+      ctx.drawImage(photo2.value, photoX, topY, smallSize, smallSize);
     }
   };
 
@@ -185,8 +184,8 @@ export default function CertificateGenerator({ data, language, referenceId }: Ce
     ctx.textAlign = 'center';
     
     const certifyText = language === 'te' 
-      ? `ఇది ధృవీకరిస్తుంది ${data.parentName} (${data.childName} యొక్క తల్లి/తండ్రి) క్రింది ప్రతిజ్ఞ కోసం:`
-      : `This is to certify ${data.parentName} (parent of ${data.childName}) for pledging the following:`;
+      ? `ఇది ధృవీకరిస్తుంది ${data.parentName} గారు (${data.childName} యొక్క తల్లి/తండ్రి) ${data.standard || ''} తరగతిలో ${data.institutionName} లో చదువుతున్నారు, క్రింది ప్రతిజ్ఞ కోసం:`
+      : `This is to certify ${data.parentName} Garu (parent of ${data.childName}) studying ${data.standard || ''} at ${data.institutionName} for pledging the following:`;
     
     const certifyLines = wrapText(ctx, certifyText, width - leftSafeZone - rightSafeZone);
     certifyLines.forEach((line, index) => {
@@ -204,12 +203,17 @@ export default function CertificateGenerator({ data, language, referenceId }: Ce
       ctx.fillText(line, width / 2, pledgeStartY + index * 24 * scale);
     });
 
-    // Institution and District
+    // District (Institution is already in certify text)
     const detailsY = pledgeStartY + pledgeLines.length * 24 * scale + 40 * scale;
     ctx.fillStyle = '#0D3A5C';
     ctx.font = `${20 * scale}px "Times New Roman", serif`;
-    ctx.fillText(`${t.institutionName}: ${data.institutionName}`, width / 2, detailsY);
-    ctx.fillText(`${t.district}: ${data.district}`, width / 2, detailsY + 35 * scale);
+    ctx.fillText(`${t.district}: ${data.district}`, width / 2, detailsY);
+
+    // Certificate Number (from database - always displayed)
+    const certNoY = detailsY + 40 * scale;
+    ctx.fillStyle = '#1E5A8A';
+    ctx.font = `bold ${18 * scale}px "Courier New", monospace`;
+    ctx.fillText(`Certificate No.: ${certificateNumber || 'N/A'}`, width / 2, certNoY);
 
     // Date
     ctx.fillStyle = '#2C3E50';
@@ -219,34 +223,20 @@ export default function CertificateGenerator({ data, language, referenceId }: Ce
       month: 'long',
       day: 'numeric',
     });
-    ctx.fillText(`Date: ${date}`, width / 2, detailsY + 80 * scale);
-
-    // Reference ID
-    if (referenceId) {
-      ctx.fillStyle = '#1E5A8A';
-      ctx.font = `bold ${16 * scale}px "Courier New", monospace`;
-      ctx.fillText(`Reference ID: ${referenceId}`, width / 2, detailsY + 110 * scale);
-    }
+    ctx.fillText(`Date: ${date}`, width / 2, certNoY + 35 * scale);
   };
 
   const downloadCertificate = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Track download in database
+    // Simple download tracking (silent - don't block download)
     if (referenceId) {
-      try {
-        await fetch('/api/certificate/download', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ referenceId }),
-        });
-      } catch (error) {
-        console.warn('Failed to track download:', error);
-        // Continue with download even if tracking fails
-      }
+      fetch('/api/certificate/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referenceId }),
+      }).catch(() => {}); // Silent fail
     }
 
     // Create download link

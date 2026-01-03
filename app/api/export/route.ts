@@ -53,12 +53,12 @@ export async function GET(request: NextRequest) {
 
         // Convert to CSV format
         const csvRows = [
-          'Child Name,Parent Name,Institution Name,District,Language,Created At',
+          'Child Name,Parent Name,Institution Name,Standard/Class,District,Language,Certificate Number,Reference ID,Created At',
         ];
         data.forEach((item) => {
           const date = new Date(item.createdAt).toISOString();
           csvRows.push(
-            `"${item.childName}","${item.parentName}","${item.institutionName}","${item.district}","${item.language}","${date}"`
+            `"${item.childName}","${item.parentName}","${item.institutionName}","${item.standard || ''}","${item.district}","${item.language}","${item.certificateNumber || ''}","${item.referenceId || ''}","${date}"`
           );
         });
 
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
           },
         });
       } else {
-        return new NextResponse('Child Name,Parent Name,Institution Name,District,Language,Created At\n', {
+        return new NextResponse('Child Name,Parent Name,Institution Name,Standard/Class,District,Language,Certificate Number,Reference ID,Created At\n', {
           headers: {
             'Content-Type': 'text/csv',
             'Content-Disposition': `attachment; filename="pledges_all_${new Date().toISOString().split('T')[0]}.csv"`,

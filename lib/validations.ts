@@ -5,6 +5,7 @@ export const pledgeSchema = z.object({
   childName: z.string().min(1, 'Child name is required').max(100).trim(),
   parentName: z.string().min(1, 'Parent name is required').max(100).trim(),
   institutionName: z.string().min(1, 'Institution name is required').max(200).trim(),
+  standard: z.string().min(1, 'Standard/Class is required').max(50).trim(),
   district: z.enum([...TELANGANA_DISTRICTS] as [string, ...string[]], {
     message: 'Please select a valid district',
   }),

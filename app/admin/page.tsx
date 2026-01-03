@@ -95,8 +95,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchAnalytics();
-      // Refresh analytics every 30 seconds
-      const interval = setInterval(fetchAnalytics, 30000);
+      // Refresh analytics every 5 seconds for near real-time updates
+      const interval = setInterval(fetchAnalytics, 5000);
       return () => clearInterval(interval);
     }
   }, [isAuthenticated, password]);

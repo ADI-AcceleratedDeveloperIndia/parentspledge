@@ -27,18 +27,25 @@ export async function GET(request: NextRequest) {
       totalPledges = await collection.countDocuments({});
 
       // Total downloads (sum of all downloadCount fields)
+      // Also count pledges that have been downloaded at least once
       const downloadStats = await collection
         .aggregate([
           {
             $group: {
               _id: null,
               totalDownloads: { $sum: { $ifNull: ['$downloadCount', 0] } },
+              pledgesWithDownloads: {
+                $sum: {
+                  $cond: [{ $gt: [{ $ifNull: ['$downloadCount', 0] }, 0] }, 1, 0]
+                }
+              }
             },
           },
         ])
         .toArray();
       
       totalDownloads = downloadStats[0]?.totalDownloads || 0;
+      console.log(`Analytics: Total downloads = ${totalDownloads}, Pledges with downloads = ${downloadStats[0]?.pledgesWithDownloads || 0}`);
 
       // District-wise analytics
       districtStats = await collection

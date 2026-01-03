@@ -14,6 +14,7 @@ export default function Home() {
     childName: '',
     parentName: '',
     institutionName: '',
+    standard: '',
     district: undefined,
     language: 'en',
   });
@@ -22,6 +23,7 @@ export default function Home() {
   const [showCertificate, setShowCertificate] = useState(false);
   const [submittedData, setSubmittedData] = useState<PledgeFormData | null>(null);
   const [referenceId, setReferenceId] = useState<string | null>(null);
+  const [certificateNumber, setCertificateNumber] = useState<string | null>(null);
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
   const [hasStartedPledging, setHasStartedPledging] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -109,6 +111,7 @@ export default function Home() {
       // Success - show certificate
       setSubmittedData(validatedData);
       setReferenceId(responseData.referenceId || null);
+      setCertificateNumber(responseData.certificateNumber || null);
       setShowCertificate(true);
     } catch (error: any) {
       if (error.issues) {
@@ -152,7 +155,12 @@ export default function Home() {
               Submit Another Pledge
             </button>
           </div>
-          <CertificateGenerator data={submittedData} language={language} referenceId={referenceId || undefined} />
+          <CertificateGenerator 
+            data={submittedData} 
+            language={language} 
+            referenceId={referenceId || undefined}
+            certificateNumber={certificateNumber || undefined}
+          />
         </div>
       </div>
     );
@@ -170,60 +178,65 @@ export default function Home() {
           
           {/* Logos and Photos - Same layout as certificate */}
           <div className="flex items-center justify-between gap-2 md:gap-4" style={{ paddingLeft: '10%', paddingRight: '10%' }}>
-            {/* Left: Logo1 and Logo3 (same size) */}
+            {/* Left: Logo1 and Logo3 (same size as photos) */}
             <div className="flex items-center gap-2 md:gap-3">
-              <img 
-                src="/logos/logo1.png" 
-                alt="Logo 1" 
-                className="w-12 h-12 md:w-16 md:h-16 object-contain"
-                style={{ width: '48px', height: '48px' }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-              <img 
-                src="/logos/logo3.png" 
-                alt="Logo 3" 
-                className="w-12 h-12 md:w-16 md:h-16 object-contain"
-                style={{ width: '48px', height: '48px' }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img 
+                  src="/logos/logo1.png" 
+                  alt="Logo 1" 
+                  style={{ width: '48px', height: '48px', objectFit: 'contain', display: 'block' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+              <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img 
+                  src="/logos/logo3.png" 
+                  alt="Logo 3" 
+                  style={{ width: '48px', height: '48px', objectFit: 'contain', display: 'block' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Middle: Logo2 (big, double size) */}
+            {/* Middle: Logo2 (big, double size = 96px) */}
             <div className="flex-1 flex justify-center">
               <img 
                 src="/logos/logo2.png" 
                 alt="Logo 2 Large" 
-                className="w-20 h-20 md:w-32 md:h-32 object-contain"
+                className="object-contain"
+                style={{ width: '96px', height: '96px', minWidth: '96px', minHeight: '96px', maxWidth: '96px', maxHeight: '96px' }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
             </div>
 
-            {/* Right: Photo1 and Photo2 (same size) */}
+            {/* Right: Photo1 and Photo2 (same size as Logo1, Logo3) */}
             <div className="flex items-center gap-2 md:gap-3">
-              <img 
-                src="/photos/1.png" 
-                alt="Photo 1" 
-                className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-full"
-                style={{ width: '48px', height: '48px' }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-              <img 
-                src="/photos/2.jpg" 
-                alt="Photo 2" 
-                className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-full"
-                style={{ width: '48px', height: '48px' }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img 
+                  src="/photos/1.png" 
+                  alt="Photo 1" 
+                  style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '50%', display: 'block' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+              <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img 
+                  src="/photos/2.jpg" 
+                  alt="Photo 2" 
+                  style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '50%', display: 'block' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -382,6 +395,31 @@ export default function Home() {
               />
               {errors.institutionName && (
                 <p className="mt-1 text-sm" style={{ color: '#FF6B35' }}>{errors.institutionName}</p>
+              )}
+            </div>
+
+            {/* Standard/Class */}
+            <div>
+              <label htmlFor="standard" className="block text-sm font-medium mb-2" style={{ color: '#0D3A5C' }}>
+                {t.standard} <span style={{ color: '#FF6B35' }}>*</span>
+              </label>
+              <input
+                type="text"
+                id="standard"
+                value={formData.standard || ''}
+                onChange={(e) => handleInputChange('standard', e.target.value)}
+                placeholder={language === 'te' ? 'ఉదా: 5వ తరగతి, 10వ తరగతి' : 'e.g., Class 5, 10th Standard'}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+                style={{
+                  border: errors.standard ? '2px solid #FF6B35' : '1px solid #B8D4E8',
+                  backgroundColor: '#FFFFFF',
+                  color: '#0D3A5C',
+                  '--tw-ring-color': '#1E5A8A'
+                } as React.CSSProperties}
+                required
+              />
+              {errors.standard && (
+                <p className="mt-1 text-sm" style={{ color: '#FF6B35' }}>{errors.standard}</p>
               )}
             </div>
 
