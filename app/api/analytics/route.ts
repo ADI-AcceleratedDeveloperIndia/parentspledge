@@ -11,6 +11,17 @@ export async function GET(request: NextRequest) {
       console.warn('No Bearer token provided, but allowing access (dummy auth)');
     }
     // Any password is accepted (dummy authentication for development)
+    
+    // Rate limiting for analytics endpoint (prevent abuse)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+    
+    // Allow 30 requests per minute for analytics (admin dashboard refreshes every 5 seconds)
+    const { checkRateLimit } = await import('@/lib/utils');
+    if (!checkRateLimit(`analytics_${ip}`, 30, 60000)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
 
     // Try to get database, but handle gracefully if not available
     let totalPledges = 0;

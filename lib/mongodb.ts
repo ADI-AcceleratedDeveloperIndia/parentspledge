@@ -16,14 +16,28 @@ async function getMongoClient(): Promise<MongoClient> {
     };
 
     if (!globalWithMongo._mongoClientPromise) {
-      const client = new MongoClient(process.env.MONGODB_URI);
+      const client = new MongoClient(process.env.MONGODB_URI, {
+        maxPoolSize: 10, // Maximum number of connections in the pool
+        minPoolSize: 2, // Minimum number of connections
+        maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+        serverSelectionTimeoutMS: 5000, // Timeout for server selection
+        socketTimeoutMS: 45000, // Timeout for socket operations
+      });
       globalWithMongo._mongoClientPromise = client.connect();
     }
     return globalWithMongo._mongoClientPromise;
   } else {
     // In production mode, it's best to not use a global variable.
     if (!clientPromise) {
-      client = new MongoClient(process.env.MONGODB_URI);
+      client = new MongoClient(process.env.MONGODB_URI, {
+        maxPoolSize: 50, // Higher pool size for production (Vercel serverless)
+        minPoolSize: 5,
+        maxIdleTimeMS: 30000,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+        retryWrites: true,
+        retryReads: true,
+      });
       clientPromise = client.connect();
     }
     return clientPromise;

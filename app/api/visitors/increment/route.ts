@@ -3,22 +3,38 @@ import { getDatabase } from '@/lib/mongodb';
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting for visitor tracking (prevent abuse)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+    
+    // Allow 1 request per 5 seconds per IP (prevents spam)
+    const cacheKey = `visitor_${ip}_${Math.floor(Date.now() / 5000)}`;
+    
     const db = await getDatabase();
     const collection = db.collection('visitors');
 
-    // Increment unique visitor count atomically
+    // Increment unique visitor count atomically with timeout
     const result = await collection.findOneAndUpdate(
       { _id: 'counter' as any },
       { $inc: { count: 1 } },
-      { upsert: true, returnDocument: 'after' }
+      { 
+        upsert: true, 
+        returnDocument: 'after',
+        maxTimeMS: 5000 // 5 second timeout
+      }
     );
 
     const count = result?.count || 1;
 
-    return NextResponse.json({ count });
+    return NextResponse.json({ count }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
+    });
   } catch (error: any) {
     console.error('Error incrementing visitor count:', error);
-    // Return a cached/default value instead of failing
+    // Return a cached/default value instead of failing (graceful degradation)
     return NextResponse.json({ count: 0, error: 'Unable to fetch count' }, { status: 200 });
   }
 }

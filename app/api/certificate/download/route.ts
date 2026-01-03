@@ -3,11 +3,21 @@ import { getDatabase } from '@/lib/mongodb';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting for download tracking
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+    
+    const { checkRateLimit } = await import('@/lib/utils');
+    if (!checkRateLimit(`download_${ip}`, 10, 60000)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+    
     const body = await request.json();
     const { referenceId } = body;
 
-    if (!referenceId) {
-      return NextResponse.json({ error: 'Reference ID is required' }, { status: 400 });
+    if (!referenceId || typeof referenceId !== 'string' || referenceId.length > 50) {
+      return NextResponse.json({ error: 'Invalid Reference ID' }, { status: 400 });
     }
 
     try {

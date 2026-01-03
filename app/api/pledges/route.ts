@@ -5,10 +5,30 @@ import { checkRateLimit } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting
-    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    if (!checkRateLimit(ip, 5, 60000)) {
-      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    // Enhanced rate limiting - stricter for high traffic
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+    
+    // Stricter rate limit: 3 requests per minute per IP (prevents abuse)
+    if (!checkRateLimit(ip, 3, 60000)) {
+      return NextResponse.json({ 
+        error: 'Too many requests. Please try again later.',
+        retryAfter: 60 
+      }, { 
+        status: 429,
+        headers: {
+          'Retry-After': '60',
+          'X-RateLimit-Limit': '3',
+          'X-RateLimit-Remaining': '0',
+        }
+      });
+    }
+
+    // Request size limit check (prevent large payload attacks)
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 10000) { // 10KB max
+      return NextResponse.json({ error: 'Request too large' }, { status: 413 });
     }
 
     const body = await request.json();
