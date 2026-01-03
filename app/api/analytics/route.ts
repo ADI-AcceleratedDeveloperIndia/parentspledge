@@ -5,9 +5,10 @@ export async function GET(request: NextRequest) {
   try {
     // Dummy authentication - accept any password (even empty)
     const authHeader = request.headers.get('authorization');
-    // Accept any non-empty Bearer token for dummy authentication
+    // Accept any Bearer token (even empty) for dummy authentication
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      // Still allow access with empty Bearer token
+      console.warn('No Bearer token provided, but allowing access (dummy auth)');
     }
     // Any password is accepted (dummy authentication for development)
 
