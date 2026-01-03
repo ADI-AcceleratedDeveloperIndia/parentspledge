@@ -159,11 +159,7 @@ export async function GET(request: NextRequest) {
         district: s._id,
         count: s.count,
       })),
-      hourWiseStats: hourWiseStats.map((s) => ({
-        hour: s._id.hour,
-        day: s._id.day,
-        count: s.count,
-      })),
+      hourWiseStats: hourWiseStats, // Already transformed above
       dayWiseStats: dayWiseStats.map((s) => ({
         date: `${s._id.year}-${String(s._id.month).padStart(2, '0')}-${String(s._id.day).padStart(2, '0')}`,
         count: s.count,
