@@ -67,6 +67,8 @@ export default function AdminDashboard() {
       setAnalytics({
         totalPledges: 0,
         totalDownloads: 0,
+        totalUniqueVisitors: 0,
+        totalRepeatedVisitors: 0,
         districtStats: [],
         hourWiseStats: [],
         dayWiseStats: [],
