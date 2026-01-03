@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface AnalyticsData {
-  totalPledges: number;
-  totalDownloads: number;
+  totalVisitors: number;
   totalUniqueVisitors: number;
   totalRepeatedVisitors: number;
+  totalDownloads: number;
   districtStats: Array<{ district: string; count: number }>;
   hourWiseStats: Array<{ hour: number; day: number; count: number }>;
   dayWiseStats: Array<{ date: string; count: number }>;
@@ -49,10 +49,10 @@ export default function AdminDashboard() {
         setPassword(authPassword);
         // Set empty analytics data
         setAnalytics({
-          totalPledges: 0,
-          totalDownloads: 0,
+          totalVisitors: 0,
           totalUniqueVisitors: 0,
           totalRepeatedVisitors: 0,
+          totalDownloads: 0,
           districtStats: [],
           hourWiseStats: [],
           dayWiseStats: [],
