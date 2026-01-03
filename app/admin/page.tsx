@@ -132,6 +132,18 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, password]);
 
+  // Show loading state if analytics is null
+  if (!analytics && isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F0F5F9' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p style={{ color: '#2C3E50' }}>Loading analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F0F5F9' }}>
@@ -273,35 +285,43 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: '#B8D4E8' }}>
-                {analytics.districtStats.map((stat) => {
+                {analytics.districtStats && analytics.districtStats.length > 0 ? (
+                  analytics.districtStats.map((stat) => {
                     // Calculate percentage based on total downloads (not pledges)
                     const totalForPercentage = analytics.totalDownloads || 1;
                     const percentage =
                       totalForPercentage > 0
                         ? ((stat.count / totalForPercentage) * 100).toFixed(1)
                         : '0';
-                  return (
-                    <tr key={stat.district}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#0D3A5C' }}>
-                        {stat.district}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: '#2C3E50' }}>
-                        {stat.count.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: '#2C3E50' }}>
-                        {percentage}%
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="w-full rounded-full h-4" style={{ backgroundColor: '#B8D4E8' }}>
-                          <div
-                            className="h-4 rounded-full"
-                            style={{ width: `${percentage}%`, backgroundColor: '#1E5A8A' }}
-                          ></div>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                    return (
+                      <tr key={stat.district || 'unknown'}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#0D3A5C' }}>
+                          {stat.district || 'Unknown'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: '#2C3E50' }}>
+                          {(stat.count || 0).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: '#2C3E50' }}>
+                          {percentage}%
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="w-full rounded-full h-4" style={{ backgroundColor: '#B8D4E8' }}>
+                            <div
+                              className="h-4 rounded-full"
+                              style={{ width: `${percentage}%`, backgroundColor: '#1E5A8A' }}
+                            ></div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-4 text-center text-sm" style={{ color: '#2C3E50' }}>
+                      No data available
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -313,29 +333,29 @@ export default function AdminDashboard() {
           <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
             <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Hour-wise Count (Last 24 Hours)</h2>
             <div className="space-y-2">
-              {analytics.hourWiseStats.length > 0 ? (
-                analytics.hourWiseStats.map((stat, idx) => (
-                  <div key={idx} className="flex items-center gap-4">
-                    <div className="w-20 text-sm" style={{ color: '#2C3E50' }}>
-                      {String(stat.hour).padStart(2, '0')}:00
-                    </div>
-                    <div className="flex-1 rounded-full h-6" style={{ backgroundColor: '#B8D4E8' }}>
-                      <div
-                        className="h-6 rounded-full flex items-center justify-end pr-2"
-                        style={{
-                          width: `${
-                            analytics.hourWiseStats.length > 0
-                              ? (stat.count / Math.max(...analytics.hourWiseStats.map((s) => s.count))) * 100
-                              : 0
-                          }%`,
-                          backgroundColor: '#4A90C2'
-                        }}
-                      >
-                        <span className="text-xs text-white font-medium">{stat.count}</span>
+              {analytics.hourWiseStats && analytics.hourWiseStats.length > 0 ? (
+                analytics.hourWiseStats.map((stat, idx) => {
+                  const maxCount = Math.max(...analytics.hourWiseStats.map((s) => s.count || 0), 1);
+                  const percentage = maxCount > 0 ? (stat.count / maxCount) * 100 : 0;
+                  return (
+                    <div key={idx} className="flex items-center gap-4">
+                      <div className="w-20 text-sm" style={{ color: '#2C3E50' }}>
+                        {String(stat.hour || 0).padStart(2, '0')}:00
+                      </div>
+                      <div className="flex-1 rounded-full h-6" style={{ backgroundColor: '#B8D4E8' }}>
+                        <div
+                          className="h-6 rounded-full flex items-center justify-end pr-2"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: '#4A90C2'
+                          }}
+                        >
+                          <span className="text-xs text-white font-medium">{stat.count || 0}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-sm" style={{ color: '#2C3E50' }}>No data available</p>
               )}
@@ -346,27 +366,27 @@ export default function AdminDashboard() {
           <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
             <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Day-wise Trend (Last 7 Days)</h2>
             <div className="space-y-2">
-              {analytics.dayWiseStats.length > 0 ? (
-                analytics.dayWiseStats.map((stat, idx) => (
-                  <div key={idx} className="flex items-center gap-4">
-                    <div className="w-24 text-sm" style={{ color: '#2C3E50' }}>{stat.date}</div>
-                    <div className="flex-1 rounded-full h-6" style={{ backgroundColor: '#B8D4E8' }}>
-                      <div
-                        className="h-6 rounded-full flex items-center justify-end pr-2"
-                        style={{
-                          width: `${
-                            analytics.dayWiseStats.length > 0
-                              ? (stat.count / Math.max(...analytics.dayWiseStats.map((s) => s.count))) * 100
-                              : 0
-                          }%`,
-                          backgroundColor: '#1E5A8A'
-                        }}
-                      >
-                        <span className="text-xs text-white font-medium">{stat.count}</span>
+              {analytics.dayWiseStats && analytics.dayWiseStats.length > 0 ? (
+                analytics.dayWiseStats.map((stat, idx) => {
+                  const maxCount = Math.max(...analytics.dayWiseStats.map((s) => s.count || 0), 1);
+                  const percentage = maxCount > 0 ? (stat.count / maxCount) * 100 : 0;
+                  return (
+                    <div key={idx} className="flex items-center gap-4">
+                      <div className="w-24 text-sm" style={{ color: '#2C3E50' }}>{stat.date || 'N/A'}</div>
+                      <div className="flex-1 rounded-full h-6" style={{ backgroundColor: '#B8D4E8' }}>
+                        <div
+                          className="h-6 rounded-full flex items-center justify-end pr-2"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: '#1E5A8A'
+                          }}
+                        >
+                          <span className="text-xs text-white font-medium">{stat.count || 0}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-sm" style={{ color: '#2C3E50' }}>No data available</p>
               )}
