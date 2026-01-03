@@ -17,18 +17,35 @@ export async function POST(request: NextRequest) {
       // Increment download count atomically
       const result = await collection.findOneAndUpdate(
         { referenceId: referenceId },
-        { 
-          $inc: { downloadCount: 1 },
-          $setOnInsert: { downloadCount: 1 } // Set to 1 if document doesn't exist
-        },
+        { $inc: { downloadCount: 1 } },
         { 
           returnDocument: 'after',
           upsert: false // Don't create if doesn't exist
         }
       );
 
-      if (!result) {
-        console.warn(`Pledge with referenceId ${referenceId} not found in database`);
+      if (!result || !result.downloadCount) {
+        console.warn(`Pledge with referenceId ${referenceId} not found or downloadCount not set`);
+        // Try to find the pledge to see if it exists
+        const existingPledge = await collection.findOne({ referenceId: referenceId });
+        if (existingPledge) {
+          console.log('Pledge exists but update failed, trying again...');
+          // Try once more with explicit set
+          const retryResult = await collection.findOneAndUpdate(
+            { referenceId: referenceId },
+            { 
+              $set: { downloadCount: (existingPledge.downloadCount || 0) + 1 }
+            },
+            { returnDocument: 'after' }
+          );
+          if (retryResult) {
+            console.log(`Download tracked (retry) for referenceId ${referenceId}, new count: ${retryResult.downloadCount}`);
+            return NextResponse.json({ 
+              success: true, 
+              downloadCount: retryResult.downloadCount || 0 
+            });
+          }
+        }
         return NextResponse.json({ 
           error: 'Pledge not found',
           referenceId: referenceId 

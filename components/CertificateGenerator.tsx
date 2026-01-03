@@ -254,13 +254,28 @@ export default function CertificateGenerator({ data, language, referenceId, cert
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Simple download tracking (silent - don't block download)
+    // Track download in database
     if (referenceId) {
-      fetch('/api/certificate/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ referenceId }),
-      }).catch(() => {}); // Silent fail
+      try {
+        const response = await fetch('/api/certificate/download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ referenceId }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Download tracked successfully:', data);
+        } else {
+          const errorData = await response.json();
+          console.warn('Download tracking failed:', errorData);
+        }
+      } catch (error) {
+        console.error('Failed to track download:', error);
+        // Continue with download even if tracking fails
+      }
+    } else {
+      console.warn('No referenceId available for download tracking');
     }
 
     // Create download link
