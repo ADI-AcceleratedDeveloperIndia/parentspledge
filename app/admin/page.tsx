@@ -223,27 +223,31 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Total Pledges and Downloads */}
+        {/* Total Visitors and Downloads */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Total Visitors - Main Count */}
           <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Total Pledges</h2>
-            <div className="text-5xl font-bold" style={{ color: '#1E5A8A' }}>{analytics.totalPledges.toLocaleString()}</div>
-            <p className="mt-2" style={{ color: '#2C3E50' }}>Live counter</p>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Total Visitors</h2>
+            <div className="text-5xl font-bold" style={{ color: '#1E5A8A' }}>{(analytics.totalVisitors || 0).toLocaleString()}</div>
+            <p className="mt-2" style={{ color: '#2C3E50' }}>All visitors</p>
+            {/* Breakdown */}
+            <div className="mt-4 pt-4 border-t" style={{ borderColor: '#B8D4E8' }}>
+              <div className="flex justify-between items-center mb-2">
+                <span style={{ color: '#2C3E50' }}>Unique:</span>
+                <span className="font-semibold" style={{ color: '#1E5A8A' }}>{(analytics.totalUniqueVisitors || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span style={{ color: '#2C3E50' }}>Repeated:</span>
+                <span className="font-semibold" style={{ color: '#4A90C2' }}>{(analytics.totalRepeatedVisitors || 0).toLocaleString()}</span>
+              </div>
+            </div>
           </div>
+          
+          {/* Total Certificate Downloads */}
           <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Total Downloads</h2>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Total Certificate Downloads</h2>
             <div className="text-5xl font-bold" style={{ color: '#FF6B35' }}>{(analytics.totalDownloads || 0).toLocaleString()}</div>
-            <p className="mt-2" style={{ color: '#2C3E50' }}>Certificate downloads</p>
-          </div>
-          <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Unique Visitors</h2>
-            <div className="text-5xl font-bold" style={{ color: '#1E5A8A' }}>{(analytics.totalUniqueVisitors || 0).toLocaleString()}</div>
-            <p className="mt-2" style={{ color: '#2C3E50' }}>First-time visitors</p>
-          </div>
-          <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Repeated Visitors</h2>
-            <div className="text-5xl font-bold" style={{ color: '#4A90C2' }}>{(analytics.totalRepeatedVisitors || 0).toLocaleString()}</div>
-            <p className="mt-2" style={{ color: '#2C3E50' }}>Returning visitors</p>
+            <p className="mt-2" style={{ color: '#2C3E50' }}>Certificates downloaded</p>
           </div>
         </div>
 
@@ -270,10 +274,12 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="divide-y" style={{ borderColor: '#B8D4E8' }}>
                 {analytics.districtStats.map((stat) => {
-                  const percentage =
-                    analytics.totalPledges > 0
-                      ? ((stat.count / analytics.totalPledges) * 100).toFixed(1)
-                      : '0';
+                    // Calculate percentage based on total downloads (not pledges)
+                    const totalForPercentage = analytics.totalDownloads || 1;
+                    const percentage =
+                      totalForPercentage > 0
+                        ? ((stat.count / totalForPercentage) * 100).toFixed(1)
+                        : '0';
                   return (
                     <tr key={stat.district}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#0D3A5C' }}>
