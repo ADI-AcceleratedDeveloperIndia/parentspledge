@@ -1,6 +1,6 @@
 # Security & Scalability Analysis for 20 Lakh Concurrent Users
 
-## ✅ Current Security Measures (All Implemented)
+## ✅ Security Measures (All Implemented)
 
 ### 1. Input Validation & Sanitization
 - ✅ Server-side validation with Zod schemas
@@ -21,9 +21,9 @@
 - ✅ X-Frame-Options: DENY
 - ✅ X-XSS-Protection: 1; mode=block
 - ✅ Referrer-Policy: strict-origin-when-cross-origin
-- ✅ **Content-Security-Policy (CSP)** - NEW
-- ✅ **HSTS (HTTP Strict Transport Security)** - NEW
-- ✅ **Permissions-Policy** - NEW
+- ✅ **Content-Security-Policy (CSP)** - Prevents XSS
+- ✅ **HSTS (HTTP Strict Transport Security)** - Forces HTTPS
+- ✅ **Permissions-Policy** - Restricts browser features
 - ✅ X-DNS-Prefetch-Control
 - ✅ X-Download-Options
 
@@ -67,7 +67,7 @@
 
 3. **Static-First Approach**
    - ✅ Main page can be statically generated
-   - ✅ ✅ Minimal API calls (only for submissions)
+   - ✅ Minimal API calls (only for submissions)
    - ✅ Certificate generation 100% client-side (no server load)
 
 4. **Graceful Degradation**
