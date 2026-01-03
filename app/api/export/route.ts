@@ -9,6 +9,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     // Accept any password for dummy authentication
+    
+    // Rate limiting for export endpoint (prevent abuse)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+    
+    const { checkRateLimit } = await import('@/lib/utils');
+    if (!checkRateLimit(`export_${ip}`, 5, 60000)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'all'; // 'all' or 'district'
