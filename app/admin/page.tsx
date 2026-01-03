@@ -25,9 +25,11 @@ export default function AdminDashboard() {
     setError('');
 
     try {
+      // Dummy authentication - accept any password (even empty)
+      const authPassword = password.trim() || 'dummy';
       const response = await fetch('/api/analytics', {
         headers: {
-          Authorization: `Bearer ${password}`,
+          Authorization: `Bearer ${authPassword}`,
         },
       });
 

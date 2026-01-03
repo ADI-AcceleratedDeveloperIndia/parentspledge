@@ -3,12 +3,13 @@ import { getDatabase } from '@/lib/mongodb';
 
 export async function GET(request: NextRequest) {
   try {
-    // Dummy authentication - accept any password
+    // Dummy authentication - accept any password (even empty)
     const authHeader = request.headers.get('authorization');
+    // Accept any non-empty Bearer token for dummy authentication
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    // Accept any password for dummy authentication
+    // Any password is accepted (dummy authentication for development)
 
     // Try to get database, but handle gracefully if not available
     let totalPledges = 0;

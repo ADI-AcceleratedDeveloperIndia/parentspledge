@@ -32,12 +32,15 @@ export default function Home() {
     fetch('/api/visitors/increment')
       .then((res) => res.json())
       .then((data) => {
-        if (data.count !== undefined) {
+        if (data.count !== undefined && data.count !== null) {
           setVisitorCount(data.count);
+        } else {
+          setVisitorCount(0);
         }
       })
-      .catch(() => {
-        // Silently fail - don't block the page
+      .catch((error) => {
+        console.warn('Failed to fetch visitor count:', error);
+        setVisitorCount(0);
       });
   }, []);
 
@@ -156,49 +159,69 @@ export default function Home() {
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: '#FFFFFF', borderColor: '#B8D4E8' }}>
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* Logo Placeholders */}
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1E5A8A' }}>
-                LOGO_1
-              </div>
-              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1E5A8A' }}>
-                LOGO_2
-              </div>
-              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1E5A8A' }}>
-                LOGO_3
-              </div>
-            </div>
+          {/* Language Toggle - Top Right */}
+          <div className="flex justify-end mb-2">
             <LanguageToggle currentLanguage={language} onLanguageChange={handleLanguageChange} />
+          </div>
+          
+          {/* Logos and Photos - Same layout as certificate */}
+          <div className="flex items-center justify-between gap-2 md:gap-4" style={{ paddingLeft: '10%', paddingRight: '10%' }}>
+            {/* Left: Logo1 and Logo2 (small) */}
+            <div className="flex items-center gap-2 md:gap-3">
+              <img 
+                src="/logos/logo1.png" 
+                alt="Logo 1" 
+                className="w-12 h-12 md:w-16 md:h-16 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+              <img 
+                src="/logos/logo2.png" 
+                alt="Logo 2" 
+                className="w-12 h-12 md:w-16 md:h-16 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+
+            {/* Middle: Logo2 (big, double size) */}
+            <div className="flex-1 flex justify-center">
+              <img 
+                src="/logos/logo2.png" 
+                alt="Logo 2 Large" 
+                className="w-20 h-20 md:w-32 md:h-32 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+
+            {/* Right: Photo1 and Photo2 */}
+            <div className="flex items-center gap-2 md:gap-3">
+              <img 
+                src="/photos/1.png" 
+                alt="Photo 1" 
+                className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-full"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+              <img 
+                src="/photos/2.jpg" 
+                alt="Photo 2" 
+                className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-full"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Leadership Photos Section */}
-      <section className="border-b py-6" style={{ backgroundColor: '#FFFFFF', borderColor: '#B8D4E8' }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-6">
-            <div className="text-center">
-              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#B8D4E8', color: '#2C3E50' }}>
-                CM_PHOTO
-              </div>
-              <p className="text-xs" style={{ color: '#2C3E50' }}>Chief Minister</p>
-            </div>
-            <div className="text-center">
-              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#B8D4E8', color: '#2C3E50' }}>
-                MINISTER_PHOTO
-              </div>
-              <p className="text-xs" style={{ color: '#2C3E50' }}>Transport Minister</p>
-            </div>
-            <div className="text-center">
-              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#B8D4E8', color: '#2C3E50' }}>
-                OFFICIAL_PHOTO
-              </div>
-              <p className="text-xs" style={{ color: '#2C3E50' }}>Official</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Leadership Photos Section - Removed as photos are now in header */}
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
