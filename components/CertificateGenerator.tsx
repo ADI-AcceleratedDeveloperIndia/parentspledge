@@ -203,27 +203,34 @@ export default function CertificateGenerator({ data, language, referenceId, cert
       ctx.fillText(line, width / 2, pledgeStartY + index * 24 * scale);
     });
 
-    // District (Institution is already in certify text)
+    // Date, District, and Certificate Number - All aligned on same line
     const detailsY = pledgeStartY + pledgeLines.length * 24 * scale + 40 * scale;
-    ctx.fillStyle = '#0D3A5C';
-    ctx.font = `${20 * scale}px "Times New Roman", serif`;
-    ctx.fillText(`${t.district}: ${data.district}`, width / 2, detailsY);
-
-    // Certificate Number (from database - always displayed)
-    const certNoY = detailsY + 40 * scale;
-    ctx.fillStyle = '#1E5A8A';
-    ctx.font = `bold ${18 * scale}px "Courier New", monospace`;
-    ctx.fillText(`Certificate No.: ${certificateNumber || 'N/A'}`, width / 2, certNoY);
-
-    // Date
+    
+    // Date - Left aligned
     ctx.fillStyle = '#2C3E50';
     ctx.font = `${18 * scale}px "Times New Roman", serif`;
+    ctx.textAlign = 'left';
     const date = new Date().toLocaleDateString(language === 'te' ? 'te-IN' : 'en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
-    ctx.fillText(`Date: ${date}`, width / 2, certNoY + 35 * scale);
+    ctx.fillText(`Date: ${date}`, leftSafeZone, detailsY);
+
+    // District - Center aligned
+    ctx.fillStyle = '#0D3A5C';
+    ctx.font = `${20 * scale}px "Times New Roman", serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${t.district}: ${data.district}`, width / 2, detailsY);
+
+    // Certificate Number - Right aligned
+    ctx.fillStyle = '#1E5A8A';
+    ctx.font = `bold ${18 * scale}px "Courier New", monospace`;
+    ctx.textAlign = 'right';
+    ctx.fillText(`Cert No.: ${certificateNumber || 'N/A'}`, width - rightSafeZone, detailsY);
+    
+    // Reset text alignment to center for other text
+    ctx.textAlign = 'center';
   };
 
   const downloadCertificate = async () => {
