@@ -65,10 +65,10 @@ export default function AdminDashboard() {
       setIsAuthenticated(true);
       setPassword('dummy');
       setAnalytics({
-        totalPledges: 0,
-        totalDownloads: 0,
+        totalVisitors: 0,
         totalUniqueVisitors: 0,
         totalRepeatedVisitors: 0,
+        totalDownloads: 0,
         districtStats: [],
         hourWiseStats: [],
         dayWiseStats: [],
