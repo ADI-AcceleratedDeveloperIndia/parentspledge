@@ -79,8 +79,42 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint for admin (protected)
+// GET endpoint - can check pledge by referenceId OR get all pledges (admin)
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const referenceId = searchParams.get('referenceId');
+
+  // If referenceId provided, check if pledge exists (public endpoint)
+  if (referenceId) {
+    try {
+      const db = await getDatabase();
+      const collection = db.collection('pledges');
+      const pledge = await collection.findOne({ referenceId: referenceId });
+      
+      if (pledge) {
+        return NextResponse.json({ 
+          pledge: {
+            referenceId: pledge.referenceId,
+            certificateNumber: pledge.certificateNumber,
+            downloadCount: pledge.downloadCount || 0,
+            childName: pledge.childName,
+            parentName: pledge.parentName,
+            institutionName: pledge.institutionName,
+            standard: pledge.standard,
+            district: pledge.district,
+            language: pledge.language,
+          }
+        });
+      } else {
+        return NextResponse.json({ error: 'Pledge not found' }, { status: 404 });
+      }
+    } catch (dbError: any) {
+      console.warn('MongoDB not available for pledge lookup:', dbError.message);
+      return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
+    }
+  }
+
+  // GET endpoint for admin (protected) - get all pledges
   try {
     // Dummy authentication - accept any password
     const authHeader = request.headers.get('authorization');

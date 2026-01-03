@@ -263,13 +263,17 @@ export default function CertificateGenerator({ data, language, referenceId, cert
           body: JSON.stringify({ referenceId }),
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Download tracked successfully:', data);
-        } else {
-          const errorData = await response.json();
-          console.warn('Download tracking failed:', errorData);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Download tracked successfully:', data);
+        // Mark as downloaded in localStorage
+        if (referenceId) {
+          localStorage.setItem('pledgeDownloaded', 'true');
         }
+      } else {
+        const errorData = await response.json();
+        console.warn('Download tracking failed:', errorData);
+      }
       } catch (error) {
         console.error('Failed to track download:', error);
         // Continue with download even if tracking fails

@@ -27,24 +27,83 @@ export default function Home() {
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
   const [hasStartedPledging, setHasStartedPledging] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [alreadyPledged, setAlreadyPledged] = useState<{ referenceId: string; downloaded: boolean } | null>(null);
+  const [isCheckingPledge, setIsCheckingPledge] = useState(true);
 
   const t = translations[language];
 
-  // Fetch visitor count on mount
+  // Check if user already pledged on page load
   useEffect(() => {
-    fetch('/api/visitors/increment')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.count !== undefined && data.count !== null) {
-          setVisitorCount(data.count);
-        } else {
-          setVisitorCount(0);
+    const checkExistingPledge = async () => {
+      try {
+        // Check localStorage for referenceId
+        const storedReferenceId = localStorage.getItem('pledgeReferenceId');
+        if (storedReferenceId) {
+          // Check if this pledge was downloaded
+          const response = await fetch(`/api/pledges?referenceId=${storedReferenceId}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.pledge) {
+              setAlreadyPledged({
+                referenceId: storedReferenceId,
+                downloaded: (data.pledge.downloadCount || 0) > 0
+              });
+              setReferenceId(storedReferenceId);
+              setCertificateNumber(data.pledge.certificateNumber);
+              if (data.pledge.downloadCount > 0) {
+                // Already downloaded - don't show form
+                setShowCertificate(false);
+              } else {
+                // Not downloaded yet - show form to allow download
+                setSubmittedData(data.pledge);
+                setShowCertificate(true);
+              }
+            }
+          }
         }
-      })
-      .catch((error) => {
-        console.warn('Failed to fetch visitor count:', error);
-        setVisitorCount(0);
-      });
+      } catch (error) {
+        console.warn('Failed to check existing pledge:', error);
+      } finally {
+        setIsCheckingPledge(false);
+      }
+    };
+
+    checkExistingPledge();
+  }, []);
+
+  // Fetch visitor count on mount - only for unique visitors
+  useEffect(() => {
+    const trackVisitor = async () => {
+      // Check if this is a first-time visitor
+      const hasVisited = localStorage.getItem('hasVisited');
+      if (!hasVisited) {
+        // First-time visitor - increment count
+        try {
+          const response = await fetch('/api/visitors/increment');
+          const data = await response.json();
+          if (data.count !== undefined && data.count !== null) {
+            setVisitorCount(data.count);
+          }
+          // Mark as visited
+          localStorage.setItem('hasVisited', 'true');
+        } catch (error) {
+          console.warn('Failed to track visitor:', error);
+        }
+      } else {
+        // Returning visitor - just fetch count without incrementing
+        try {
+          const response = await fetch('/api/visitors/increment', { method: 'POST' });
+          const data = await response.json();
+          if (data.count !== undefined && data.count !== null) {
+            setVisitorCount(data.count);
+          }
+        } catch (error) {
+          console.warn('Failed to fetch visitor count:', error);
+        }
+      }
+    };
+
+    trackVisitor();
   }, []);
 
   const handleInputChange = (field: keyof PledgeFormData, value: string) => {
@@ -112,6 +171,12 @@ export default function Home() {
       setSubmittedData(validatedData);
       setReferenceId(responseData.referenceId || null);
       setCertificateNumber(responseData.certificateNumber || null);
+      
+      // Store referenceId in localStorage
+      if (responseData.referenceId) {
+        localStorage.setItem('pledgeReferenceId', responseData.referenceId);
+      }
+      
       setShowCertificate(true);
     } catch (error: any) {
       if (error.issues) {
@@ -130,6 +195,55 @@ export default function Home() {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading state while checking pledge
+  if (isCheckingPledge) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F0F5F9' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p style={{ color: '#2C3E50' }}>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if already pledged and downloaded
+  if (alreadyPledged?.downloaded && !showCertificate) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: '#F0F5F9' }}>
+        <header className="border-b" style={{ backgroundColor: '#FFFFFF', borderColor: '#B8D4E8' }}>
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex justify-end mb-2">
+              <LanguageToggle currentLanguage={language} onLanguageChange={handleLanguageChange} />
+            </div>
+          </div>
+        </header>
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <div className="rounded-lg p-8 text-center" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
+            <h1 className="text-3xl font-bold mb-4" style={{ color: '#0D3A5C' }}>
+              {language === 'te' ? 'మీరు ఇప్పటికే ప్రతిజ్ఞ చేసి సర్టిఫికేట్ డౌన్‌లోడ్ చేసారు' : 'You have already pledged and downloaded certificate'}
+            </h1>
+            <p className="text-lg mb-6" style={{ color: '#2C3E50' }}>
+              {language === 'te' 
+                ? 'మీరు ఇప్పటికే రోడ్ సేఫ్టీ ప్రతిజ్ఞ చేసి మీ సర్టిఫికేట్ డౌన్‌లోడ్ చేసారు. ధన్యవాదాలు!'
+                : 'You have already taken the Road Safety Pledge and downloaded your certificate. Thank you!'}
+            </p>
+            <p className="text-sm" style={{ color: '#2C3E50' }}>
+              {language === 'te' ? 'సర్టిఫికేట్ నంబర్' : 'Certificate Number'}: <span className="font-bold" style={{ color: '#1E5A8A' }}>{certificateNumber || 'N/A'}</span>
+            </p>
+          </div>
+        </main>
+        <footer className="border-t mt-12 py-6" style={{ backgroundColor: '#FFFFFF', borderColor: '#B8D4E8' }}>
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <p style={{ color: '#2C3E50' }}>
+              {t.visitorCount}: <span className="font-bold" style={{ color: '#1E5A8A' }}>{visitorCount ?? '...'}</span>
+            </p>
+          </div>
+        </footer>
+      </div>
+    );
+  }
 
   if (showCertificate && submittedData) {
     return (
