@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 interface AnalyticsData {
   totalPledges: number;
   totalDownloads: number;
+  totalUniqueVisitors: number;
+  totalRepeatedVisitors: number;
   districtStats: Array<{ district: string; count: number }>;
   hourWiseStats: Array<{ hour: number; day: number; count: number }>;
   dayWiseStats: Array<{ date: string; count: number }>;
@@ -228,6 +230,16 @@ export default function AdminDashboard() {
             <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Total Downloads</h2>
             <div className="text-5xl font-bold" style={{ color: '#FF6B35' }}>{(analytics.totalDownloads || 0).toLocaleString()}</div>
             <p className="mt-2" style={{ color: '#2C3E50' }}>Certificate downloads</p>
+          </div>
+          <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Unique Visitors</h2>
+            <div className="text-5xl font-bold" style={{ color: '#1E5A8A' }}>{(analytics.totalUniqueVisitors || 0).toLocaleString()}</div>
+            <p className="mt-2" style={{ color: '#2C3E50' }}>First-time visitors</p>
+          </div>
+          <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Repeated Visitors</h2>
+            <div className="text-5xl font-bold" style={{ color: '#4A90C2' }}>{(analytics.totalRepeatedVisitors || 0).toLocaleString()}</div>
+            <p className="mt-2" style={{ color: '#2C3E50' }}>Returning visitors</p>
           </div>
         </div>
 

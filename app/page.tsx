@@ -78,13 +78,13 @@ export default function Home() {
     checkExistingPledge();
   }, []);
 
-  // Fetch visitor count on mount - only for unique visitors
+  // Fetch visitor count on mount - track unique and repeated visitors
   useEffect(() => {
     const trackVisitor = async () => {
       // Check if this is a first-time visitor
       const hasVisited = localStorage.getItem('hasVisited');
       if (!hasVisited) {
-        // First-time visitor - increment count
+        // First-time visitor - increment unique visitor count
         try {
           const response = await fetch('/api/visitors/increment');
           const data = await response.json();
@@ -97,15 +97,17 @@ export default function Home() {
           console.warn('Failed to track visitor:', error);
         }
       } else {
-        // Returning visitor - just fetch count without incrementing
+        // Returning visitor - increment repeated visitor count
         try {
+          await fetch('/api/visitors/increment', { method: 'PUT' });
+          // Also fetch unique visitor count to display
           const response = await fetch('/api/visitors/increment', { method: 'POST' });
           const data = await response.json();
           if (data.count !== undefined && data.count !== null) {
             setVisitorCount(data.count);
           }
         } catch (error) {
-          console.warn('Failed to fetch visitor count:', error);
+          console.warn('Failed to track repeated visitor:', error);
         }
       }
     };

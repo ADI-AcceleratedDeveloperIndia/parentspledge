@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
     // Try to get database, but handle gracefully if not available
     let totalPledges = 0;
     let totalDownloads = 0;
+    let totalUniqueVisitors = 0;
+    let totalRepeatedVisitors = 0;
     let districtStats: any[] = [];
     let hourWiseStats: any[] = [];
     let dayWiseStats: any[] = [];
@@ -23,9 +25,18 @@ export async function GET(request: NextRequest) {
     try {
       const db = await getDatabase();
       const collection = db.collection('pledges');
+      const visitorsCollection = db.collection('visitors');
 
       // Total pledges
       totalPledges = await collection.countDocuments({});
+
+      // Total unique visitors
+      const uniqueVisitorDoc = await visitorsCollection.findOne({ _id: 'counter' as any });
+      totalUniqueVisitors = uniqueVisitorDoc?.count || 0;
+
+      // Total repeated visitors
+      const repeatedVisitorDoc = await visitorsCollection.findOne({ _id: 'repeatedCounter' as any });
+      totalRepeatedVisitors = repeatedVisitorDoc?.count || 0;
 
       // Total downloads = count of unique users who downloaded (downloadCount > 0)
       // One download per pledge - count pledges that have been downloaded
@@ -159,6 +170,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       totalPledges,
       totalDownloads,
+      totalUniqueVisitors,
+      totalRepeatedVisitors,
       districtStats: districtStats.map((s) => ({
         district: s._id,
         count: s.count,

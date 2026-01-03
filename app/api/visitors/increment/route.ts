@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const db = await getDatabase();
     const collection = db.collection('visitors');
 
-    // Increment visitor count atomically
+    // Increment unique visitor count atomically
     const result = await collection.findOneAndUpdate(
       { _id: 'counter' as any },
       { $inc: { count: 1 } },
@@ -19,6 +19,28 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Error incrementing visitor count:', error);
     // Return a cached/default value instead of failing
+    return NextResponse.json({ count: 0, error: 'Unable to fetch count' }, { status: 200 });
+  }
+}
+
+// PUT endpoint to increment repeated visitors (called by client when returning visitor detected)
+export async function PUT(request: NextRequest) {
+  try {
+    const db = await getDatabase();
+    const collection = db.collection('visitors');
+
+    // Increment repeated visitor count atomically
+    const result = await collection.findOneAndUpdate(
+      { _id: 'repeatedCounter' as any },
+      { $inc: { count: 1 } },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    const count = result?.count || 1;
+
+    return NextResponse.json({ count });
+  } catch (error: any) {
+    console.error('Error incrementing repeated visitor count:', error);
     return NextResponse.json({ count: 0, error: 'Unable to fetch count' }, { status: 200 });
   }
 }
