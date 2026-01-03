@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 interface AnalyticsData {
   totalPledges: number;
+  totalDownloads: number;
   districtStats: Array<{ district: string; count: number }>;
   hourWiseStats: Array<{ hour: number; day: number; count: number }>;
   dayWiseStats: Array<{ date: string; count: number }>;
@@ -191,11 +192,18 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Total Pledges */}
-        <div className="rounded-lg p-6 mb-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
-          <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Total Pledges</h2>
-          <div className="text-5xl font-bold" style={{ color: '#1E5A8A' }}>{analytics.totalPledges.toLocaleString()}</div>
-          <p className="mt-2" style={{ color: '#2C3E50' }}>Live counter</p>
+        {/* Total Pledges and Downloads */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Total Pledges</h2>
+            <div className="text-5xl font-bold" style={{ color: '#1E5A8A' }}>{analytics.totalPledges.toLocaleString()}</div>
+            <p className="mt-2" style={{ color: '#2C3E50' }}>Live counter</p>
+          </div>
+          <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Total Downloads</h2>
+            <div className="text-5xl font-bold" style={{ color: '#FF6B35' }}>{(analytics.totalDownloads || 0).toLocaleString()}</div>
+            <p className="mt-2" style={{ color: '#2C3E50' }}>Certificate downloads</p>
+          </div>
         </div>
 
         {/* District-wise Analytics */}

@@ -7,9 +7,10 @@ import { PledgeFormData } from '@/lib/validations';
 interface CertificateGeneratorProps {
   data: PledgeFormData;
   language: Language;
+  referenceId?: string;
 }
 
-export default function CertificateGenerator({ data, language }: CertificateGeneratorProps) {
+export default function CertificateGenerator({ data, language, referenceId }: CertificateGeneratorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isGenerating, setIsGenerating] = useState(true);
   const t = translations[language];
@@ -75,15 +76,16 @@ export default function CertificateGenerator({ data, language }: CertificateGene
       ctx.drawImage(bgImage, 0, 0, width, height);
 
       // Load all images in parallel
-      const [logo1, logo2, photo1, photo2] = await Promise.allSettled([
+      const [logo1, logo2, logo3, photo1, photo2] = await Promise.allSettled([
         loadImage('/logos/logo1.png'),
         loadImage('/logos/logo2.png'),
+        loadImage('/logos/logo3.png'),
         loadImage('/photos/1.png'),
         loadImage('/photos/2.jpg'),
       ]);
 
       // Draw logos and photos
-      drawLogosAndPhotos(ctx, width, height, scale, logo1, logo2, photo1, photo2);
+      drawLogosAndPhotos(ctx, width, height, scale, logo1, logo2, logo3, photo1, photo2);
 
       // Draw text content (adjusted to avoid overlaps)
       drawTextContent(ctx, width, height, scale);
@@ -112,28 +114,31 @@ export default function CertificateGenerator({ data, language }: CertificateGene
     scale: number,
     logo1: PromiseSettledResult<HTMLImageElement>,
     logo2: PromiseSettledResult<HTMLImageElement>,
+    logo3: PromiseSettledResult<HTMLImageElement>,
     photo1: PromiseSettledResult<HTMLImageElement>,
     photo2: PromiseSettledResult<HTMLImageElement>
   ) => {
-    const baseLogoSize = 50 * scale; // Base size for logo1 and small logo2
-    const logo2BigSize = baseLogoSize * 2; // Logo2 big version is double size
-    const photoSize = baseLogoSize; // Photos same size as small logos
+    // Ensure Logo1 and Logo3 are the same size
+    const logo1And3Size = 50 * scale; // Same size for both Logo1 and Logo3
+    const logo2BigSize = logo1And3Size * 2; // Logo2 big version is double size
+    // Ensure Photo1 and Photo2 are the same size
+    const photo1And2Size = 50 * scale; // Same size for both Photo1 and Photo2
     const paddingPercent = 0.1; // 10% padding from edges
     const horizontalPadding = width * paddingPercent;
     const topY = 30 * scale; // Top edge position
     const spacing = 20 * scale; // Spacing between elements
 
-    // LEFT SIDE: Logo1 and Logo2 (small) together
+    // LEFT SIDE: Logo1 and Logo3 (same size) together
     let currentX = horizontalPadding;
     
     if (logo1.status === 'fulfilled') {
-      ctx.drawImage(logo1.value, currentX, topY, baseLogoSize, baseLogoSize);
-      currentX += baseLogoSize + spacing;
+      ctx.drawImage(logo1.value, currentX, topY, logo1And3Size, logo1And3Size);
+      currentX += logo1And3Size + spacing;
     }
     
-    if (logo2.status === 'fulfilled') {
-      // Small logo2 on left
-      ctx.drawImage(logo2.value, currentX, topY, baseLogoSize, baseLogoSize);
+    if (logo3.status === 'fulfilled') {
+      // Logo3 same size as Logo1
+      ctx.drawImage(logo3.value, currentX, topY, logo1And3Size, logo1And3Size);
     }
 
     // MIDDLE: Logo2 (big, double size) - centered
@@ -142,17 +147,18 @@ export default function CertificateGenerator({ data, language }: CertificateGene
       ctx.drawImage(logo2.value, logo2BigX, topY, logo2BigSize, logo2BigSize);
     }
 
-    // RIGHT SIDE: Photo1 and Photo2 together
-    const rightStartX = width - horizontalPadding - (photoSize * 2) - spacing;
+    // RIGHT SIDE: Photo1 and Photo2 (same size) together
+    const rightStartX = width - horizontalPadding - (photo1And2Size * 2) - spacing;
     let photoX = rightStartX;
     
     if (photo1.status === 'fulfilled') {
-      ctx.drawImage(photo1.value, photoX, topY, photoSize, photoSize);
-      photoX += photoSize + spacing;
+      ctx.drawImage(photo1.value, photoX, topY, photo1And2Size, photo1And2Size);
+      photoX += photo1And2Size + spacing;
     }
     
     if (photo2.status === 'fulfilled') {
-      ctx.drawImage(photo2.value, photoX, topY, photoSize, photoSize);
+      // Photo2 same size as Photo1
+      ctx.drawImage(photo2.value, photoX, topY, photo1And2Size, photo1And2Size);
     }
   };
 
@@ -172,66 +178,76 @@ export default function CertificateGenerator({ data, language }: CertificateGene
     const titleY = topSafeZone + 40 * scale;
     ctx.fillText(t.certificateTitle, width / 2, titleY);
 
-    // Subtitle
-    ctx.fillStyle = '#1E5A8A';
-    ctx.font = `bold ${26 * scale}px "Times New Roman", serif`;
-    ctx.fillText(translations.en.subtitle, width / 2, titleY + 50 * scale);
-
-    // Certificate content - "This is to certify that"
+    // Certificate content - "This is to certify [parent name] (parent of [child name]) for pledging the following:"
     const contentY = titleY + 100 * scale;
     ctx.fillStyle = '#0D3A5C';
     ctx.font = `${22 * scale}px "Times New Roman", serif`;
     ctx.textAlign = 'center';
-    ctx.fillText(t.certificateSubtitle, width / 2, contentY);
-
-    // Name section - prominent and bold
-    ctx.fillStyle = '#0D3A5C';
-    ctx.font = `bold ${36 * scale}px "Times New Roman", serif`;
-    const nameY = contentY + 50 * scale;
-    ctx.fillText(data.childName, width / 2, nameY);
-
-    // Parent name
-    ctx.fillStyle = '#1E5A8A';
-    ctx.font = `${22 * scale}px "Times New Roman", serif`;
-    ctx.fillText(`(${t.parentName}: ${data.parentName})`, width / 2, nameY + 40 * scale);
-
-    // Institution and District
-    ctx.fillStyle = '#0D3A5C';
-    ctx.font = `${18 * scale}px "Times New Roman", serif`;
-    ctx.fillText(`${t.institutionName}: ${data.institutionName}`, width / 2, nameY + 80 * scale);
-    ctx.fillText(`${t.district}: ${data.district}`, width / 2, nameY + 110 * scale);
-
-    // Pledge text - smaller, italic, with proper wrapping
-    ctx.fillStyle = '#0D3A5C';
-    ctx.font = `italic ${16 * scale}px "Times New Roman", serif`;
-    const pledgeText = t.fullPledgeText;
-    const maxWidth = width - leftSafeZone - rightSafeZone;
-    const lines = wrapText(ctx, pledgeText, maxWidth);
-    const pledgeStartY = nameY + 150 * scale;
-    lines.forEach((line, index) => {
-      ctx.fillText(line, width / 2, pledgeStartY + index * 22 * scale);
+    
+    const certifyText = language === 'te' 
+      ? `ఇది ధృవీకరిస్తుంది ${data.parentName} (${data.childName} యొక్క తల్లి/తండ్రి) క్రింది ప్రతిజ్ఞ కోసం:`
+      : `This is to certify ${data.parentName} (parent of ${data.childName}) for pledging the following:`;
+    
+    const certifyLines = wrapText(ctx, certifyText, width - leftSafeZone - rightSafeZone);
+    certifyLines.forEach((line, index) => {
+      ctx.fillText(line, width / 2, contentY + index * 28 * scale);
     });
 
-    // Certificate confirmation text
-    const pledgeEndY = pledgeStartY + lines.length * 22 * scale + 30 * scale;
-    ctx.fillStyle = '#1E5A8A';
-    ctx.font = `bold ${20 * scale}px "Times New Roman", serif`;
-    ctx.fillText(t.certificateText, width / 2, pledgeEndY);
+    // Pledge text - italic, with proper wrapping
+    const pledgeStartY = contentY + certifyLines.length * 28 * scale + 30 * scale;
+    ctx.fillStyle = '#0D3A5C';
+    ctx.font = `italic ${18 * scale}px "Times New Roman", serif`;
+    const pledgeText = t.fullPledgeText;
+    const maxWidth = width - leftSafeZone - rightSafeZone;
+    const pledgeLines = wrapText(ctx, pledgeText, maxWidth);
+    pledgeLines.forEach((line, index) => {
+      ctx.fillText(line, width / 2, pledgeStartY + index * 24 * scale);
+    });
 
-    // Date - at bottom, above bottom safe zone
+    // Institution and District
+    const detailsY = pledgeStartY + pledgeLines.length * 24 * scale + 40 * scale;
+    ctx.fillStyle = '#0D3A5C';
+    ctx.font = `${20 * scale}px "Times New Roman", serif`;
+    ctx.fillText(`${t.institutionName}: ${data.institutionName}`, width / 2, detailsY);
+    ctx.fillText(`${t.district}: ${data.district}`, width / 2, detailsY + 35 * scale);
+
+    // Date
     ctx.fillStyle = '#2C3E50';
-    ctx.font = `${16 * scale}px "Times New Roman", serif`;
+    ctx.font = `${18 * scale}px "Times New Roman", serif`;
     const date = new Date().toLocaleDateString(language === 'te' ? 'te-IN' : 'en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
-    ctx.fillText(`Date: ${date}`, width / 2, height - bottomSafeZone);
+    ctx.fillText(`Date: ${date}`, width / 2, detailsY + 80 * scale);
+
+    // Reference ID
+    if (referenceId) {
+      ctx.fillStyle = '#1E5A8A';
+      ctx.font = `bold ${16 * scale}px "Courier New", monospace`;
+      ctx.fillText(`Reference ID: ${referenceId}`, width / 2, detailsY + 110 * scale);
+    }
   };
 
-  const downloadCertificate = () => {
+  const downloadCertificate = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // Track download in database
+    if (referenceId) {
+      try {
+        await fetch('/api/certificate/download', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ referenceId }),
+        });
+      } catch (error) {
+        console.warn('Failed to track download:', error);
+        // Continue with download even if tracking fails
+      }
+    }
 
     // Create download link
     canvas.toBlob((blob) => {

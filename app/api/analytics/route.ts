@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
 
     // Try to get database, but handle gracefully if not available
     let totalPledges = 0;
+    let totalDownloads = 0;
     let districtStats: any[] = [];
     let hourWiseStats: any[] = [];
     let dayWiseStats: any[] = [];
@@ -24,6 +25,20 @@ export async function GET(request: NextRequest) {
 
       // Total pledges
       totalPledges = await collection.countDocuments({});
+
+      // Total downloads (sum of all downloadCount fields)
+      const downloadStats = await collection
+        .aggregate([
+          {
+            $group: {
+              _id: null,
+              totalDownloads: { $sum: { $ifNull: ['$downloadCount', 0] } },
+            },
+          },
+        ])
+        .toArray();
+      
+      totalDownloads = downloadStats[0]?.totalDownloads || 0;
 
       // District-wise analytics
       districtStats = await collection
@@ -118,6 +133,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       totalPledges,
+      totalDownloads,
       districtStats: districtStats.map((s) => ({
         district: s._id,
         count: s.count,

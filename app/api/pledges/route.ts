@@ -24,6 +24,9 @@ export async function POST(request: NextRequest) {
 
     const data = validationResult.data;
 
+    // Generate random reference ID
+    const referenceId = `RS${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
     // Sanitize inputs (additional server-side sanitization)
     const sanitizedData = {
       childName: data.childName.trim().substring(0, 100),
@@ -31,6 +34,8 @@ export async function POST(request: NextRequest) {
       institutionName: data.institutionName.trim().substring(0, 200),
       district: data.district,
       language: data.language,
+      referenceId: referenceId,
+      downloadCount: 0,
       createdAt: new Date(),
     };
 
@@ -46,7 +51,7 @@ export async function POST(request: NextRequest) {
       const result = await collection.insertOne(sanitizedData);
 
       return NextResponse.json(
-        { success: true, id: result.insertedId },
+        { success: true, id: result.insertedId, referenceId: referenceId },
         { status: 201 }
       );
     } catch (dbError: any) {

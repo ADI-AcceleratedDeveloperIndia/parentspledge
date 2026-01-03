@@ -21,6 +21,7 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [submittedData, setSubmittedData] = useState<PledgeFormData | null>(null);
+  const [referenceId, setReferenceId] = useState<string | null>(null);
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
   const [hasStartedPledging, setHasStartedPledging] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -103,8 +104,11 @@ export default function Home() {
         throw new Error(errorData.error || 'Failed to submit pledge');
       }
 
+      const responseData = await response.json();
+      
       // Success - show certificate
       setSubmittedData(validatedData);
+      setReferenceId(responseData.referenceId || null);
       setShowCertificate(true);
     } catch (error: any) {
       if (error.issues) {
@@ -148,7 +152,7 @@ export default function Home() {
               Submit Another Pledge
             </button>
           </div>
-          <CertificateGenerator data={submittedData} language={language} />
+          <CertificateGenerator data={submittedData} language={language} referenceId={referenceId || undefined} />
         </div>
       </div>
     );
@@ -166,20 +170,22 @@ export default function Home() {
           
           {/* Logos and Photos - Same layout as certificate */}
           <div className="flex items-center justify-between gap-2 md:gap-4" style={{ paddingLeft: '10%', paddingRight: '10%' }}>
-            {/* Left: Logo1 and Logo2 (small) */}
+            {/* Left: Logo1 and Logo3 (same size) */}
             <div className="flex items-center gap-2 md:gap-3">
               <img 
                 src="/logos/logo1.png" 
                 alt="Logo 1" 
                 className="w-12 h-12 md:w-16 md:h-16 object-contain"
+                style={{ width: '48px', height: '48px' }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
               <img 
-                src="/logos/logo2.png" 
-                alt="Logo 2" 
+                src="/logos/logo3.png" 
+                alt="Logo 3" 
                 className="w-12 h-12 md:w-16 md:h-16 object-contain"
+                style={{ width: '48px', height: '48px' }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
@@ -198,12 +204,13 @@ export default function Home() {
               />
             </div>
 
-            {/* Right: Photo1 and Photo2 */}
+            {/* Right: Photo1 and Photo2 (same size) */}
             <div className="flex items-center gap-2 md:gap-3">
               <img 
                 src="/photos/1.png" 
                 alt="Photo 1" 
                 className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-full"
+                style={{ width: '48px', height: '48px' }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
@@ -212,6 +219,7 @@ export default function Home() {
                 src="/photos/2.jpg" 
                 alt="Photo 2" 
                 className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-full"
+                style={{ width: '48px', height: '48px' }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
