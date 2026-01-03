@@ -52,3 +52,6 @@
 - Admin dashboard requires password authentication
 - Visitor count increments automatically on page load
 
+
+
+

@@ -123,10 +123,10 @@ export default function Home() {
 
   if (showCertificate && submittedData) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#F5F9FD' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#F0F5F9' }}>
         <div className="max-w-4xl mx-auto py-8 px-4">
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold mb-4" style={{ color: '#123C66' }}>{t.success}</h1>
+            <h1 className="text-2xl font-bold mb-4" style={{ color: '#0D3A5C' }}>{t.success}</h1>
             <button
               onClick={() => {
                 setShowCertificate(false);
@@ -140,7 +140,7 @@ export default function Home() {
                 setSubmittedData(null);
               }}
               className="underline font-medium"
-              style={{ color: '#1F6FB2' }}
+              style={{ color: '#1E5A8A' }}
             >
               Submit Another Pledge
             </button>
@@ -154,18 +154,18 @@ export default function Home() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FFFFFF' }}>
       {/* Header */}
-      <header className="border-b" style={{ backgroundColor: '#FFFFFF', borderColor: '#D6E2EE' }}>
+      <header className="border-b" style={{ backgroundColor: '#FFFFFF', borderColor: '#B8D4E8' }}>
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Logo Placeholders */}
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1F6FB2' }}>
+              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1E5A8A' }}>
                 LOGO_1
               </div>
-              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1F6FB2' }}>
+              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1E5A8A' }}>
                 LOGO_2
               </div>
-              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1F6FB2' }}>
+              <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: '#1E5A8A' }}>
                 LOGO_3
               </div>
             </div>
@@ -175,26 +175,26 @@ export default function Home() {
       </header>
 
       {/* Leadership Photos Section */}
-      <section className="border-b py-6" style={{ backgroundColor: '#FFFFFF', borderColor: '#D6E2EE' }}>
+      <section className="border-b py-6" style={{ backgroundColor: '#FFFFFF', borderColor: '#B8D4E8' }}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-6">
             <div className="text-center">
-              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#D6E2EE', color: '#4A4A4A' }}>
+              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#B8D4E8', color: '#2C3E50' }}>
                 CM_PHOTO
               </div>
-              <p className="text-xs" style={{ color: '#4A4A4A' }}>Chief Minister</p>
+              <p className="text-xs" style={{ color: '#2C3E50' }}>Chief Minister</p>
             </div>
             <div className="text-center">
-              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#D6E2EE', color: '#4A4A4A' }}>
+              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#B8D4E8', color: '#2C3E50' }}>
                 MINISTER_PHOTO
               </div>
-              <p className="text-xs" style={{ color: '#4A4A4A' }}>Transport Minister</p>
+              <p className="text-xs" style={{ color: '#2C3E50' }}>Transport Minister</p>
             </div>
             <div className="text-center">
-              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#D6E2EE', color: '#4A4A4A' }}>
+              <div className="w-24 h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-xs" style={{ backgroundColor: '#B8D4E8', color: '#2C3E50' }}>
                 OFFICIAL_PHOTO
               </div>
-              <p className="text-xs" style={{ color: '#4A4A4A' }}>Official</p>
+              <p className="text-xs" style={{ color: '#2C3E50' }}>Official</p>
             </div>
           </div>
         </div>
@@ -203,23 +203,23 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         {/* Pledge Content Section - Always Visible */}
-        <div className="rounded-lg p-6 md:p-8" style={{ backgroundColor: '#F5F9FD', border: '1px solid #D6E2EE' }}>
+        <div className="rounded-lg p-6 md:p-8" style={{ backgroundColor: '#F0F5F9', border: '1px solid #B8D4E8' }}>
           <div className="text-center mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#123C66' }}>{t.title}</h1>
-            <p className="text-lg" style={{ color: '#4A4A4A' }}>{t.subtitle}</p>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#0D3A5C' }}>{t.title}</h1>
+            <p className="text-lg" style={{ color: '#2C3E50' }}>{t.subtitle}</p>
           </div>
 
           {/* Pledge Text Display */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#123C66' }}>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>
               {language === 'te' ? 'తల్లిదండ్రుల హామీ పత్రం' : 'Parents Pledge'}
             </h2>
             <div 
               className="text-base leading-relaxed p-6 rounded-lg"
               style={{ 
                 backgroundColor: '#FFFFFF', 
-                border: '1px solid #D6E2EE',
-                color: '#123C66',
+                border: '1px solid #B8D4E8',
+                color: '#0D3A5C',
                 minHeight: '200px'
               }}
             >
@@ -234,7 +234,7 @@ export default function Home() {
                 onClick={handleStartPledging}
                 disabled={isPlayingAudio}
                 className="px-8 py-4 text-white rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-                style={{ backgroundColor: isPlayingAudio ? '#5DA9E9' : '#1F6FB2' }}
+                style={{ backgroundColor: isPlayingAudio ? '#4A90C2' : '#1E5A8A' }}
               >
                 {isPlayingAudio ? (
                   <span className="flex items-center justify-center gap-2">
@@ -254,11 +254,11 @@ export default function Home() {
           {/* Audio Playing Indicator */}
           {isPlayingAudio && (
             <div className="mt-4 text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#FFFFFF', border: '1px solid #D6E2EE' }}>
-                <svg className="animate-pulse h-5 w-5" style={{ color: '#1F6FB2' }} fill="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
+                <svg className="animate-pulse h-5 w-5" style={{ color: '#1E5A8A' }} fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
                 </svg>
-                <span style={{ color: '#123C66' }}>
+                <span style={{ color: '#0D3A5C' }}>
                   {language === 'te' ? 'ఆడియో ప్లే అవుతోంది...' : 'Audio is playing...'}
                 </span>
               </div>
@@ -268,9 +268,9 @@ export default function Home() {
 
         {/* Form Section - Shows after clicking Start Pledging */}
         {hasStartedPledging && (
-          <div className="rounded-lg p-6 md:p-8" style={{ backgroundColor: '#F5F9FD', border: '1px solid #D6E2EE' }}>
+          <div className="rounded-lg p-6 md:p-8" style={{ backgroundColor: '#F0F5F9', border: '1px solid #B8D4E8' }}>
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold mb-2" style={{ color: '#123C66' }}>{t.formTitle}</h2>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: '#0D3A5C' }}>{t.formTitle}</h2>
             </div>
 
             <div className="mb-6 flex justify-center">
@@ -280,8 +280,8 @@ export default function Home() {
             <form onSubmit={handleSubmit} className="space-y-6">
             {/* Child Name */}
             <div>
-              <label htmlFor="childName" className="block text-sm font-medium mb-2" style={{ color: '#123C66' }}>
-                {t.childName} <span style={{ color: '#E3B341' }}>*</span>
+              <label htmlFor="childName" className="block text-sm font-medium mb-2" style={{ color: '#0D3A5C' }}>
+                {t.childName} <span style={{ color: '#FF6B35' }}>*</span>
               </label>
               <input
                 type="text"
@@ -290,22 +290,22 @@ export default function Home() {
                 onChange={(e) => handleInputChange('childName', e.target.value)}
                 className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
                 style={{
-                  border: errors.childName ? '2px solid #E3B341' : '1px solid #D6E2EE',
+                  border: errors.childName ? '2px solid #FF6B35' : '1px solid #B8D4E8',
                   backgroundColor: '#FFFFFF',
-                  color: '#123C66',
-                  '--tw-ring-color': '#1F6FB2'
+                  color: '#0D3A5C',
+                  '--tw-ring-color': '#1E5A8A'
                 } as React.CSSProperties}
                 required
               />
               {errors.childName && (
-                <p className="mt-1 text-sm" style={{ color: '#E3B341' }}>{errors.childName}</p>
+                <p className="mt-1 text-sm" style={{ color: '#FF6B35' }}>{errors.childName}</p>
               )}
             </div>
 
             {/* Parent Name */}
             <div>
-              <label htmlFor="parentName" className="block text-sm font-medium mb-2" style={{ color: '#123C66' }}>
-                {t.parentName} <span style={{ color: '#E3B341' }}>*</span>
+              <label htmlFor="parentName" className="block text-sm font-medium mb-2" style={{ color: '#0D3A5C' }}>
+                {t.parentName} <span style={{ color: '#FF6B35' }}>*</span>
               </label>
               <input
                 type="text"
@@ -314,15 +314,15 @@ export default function Home() {
                 onChange={(e) => handleInputChange('parentName', e.target.value)}
                 className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
                 style={{
-                  border: errors.parentName ? '2px solid #E3B341' : '1px solid #D6E2EE',
+                  border: errors.parentName ? '2px solid #FF6B35' : '1px solid #B8D4E8',
                   backgroundColor: '#FFFFFF',
-                  color: '#123C66',
-                  '--tw-ring-color': '#1F6FB2'
+                  color: '#0D3A5C',
+                  '--tw-ring-color': '#1E5A8A'
                 } as React.CSSProperties}
                 required
               />
               {errors.parentName && (
-                <p className="mt-1 text-sm" style={{ color: '#E3B341' }}>{errors.parentName}</p>
+                <p className="mt-1 text-sm" style={{ color: '#FF6B35' }}>{errors.parentName}</p>
               )}
             </div>
 
@@ -331,9 +331,9 @@ export default function Home() {
               <label
                 htmlFor="institutionName"
                 className="block text-sm font-medium mb-2"
-                style={{ color: '#123C66' }}
+                style={{ color: '#0D3A5C' }}
               >
-                {t.institutionName} <span style={{ color: '#E3B341' }}>*</span>
+                {t.institutionName} <span style={{ color: '#FF6B35' }}>*</span>
               </label>
               <input
                 type="text"
@@ -342,22 +342,22 @@ export default function Home() {
                 onChange={(e) => handleInputChange('institutionName', e.target.value)}
                 className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
                 style={{
-                  border: errors.institutionName ? '2px solid #E3B341' : '1px solid #D6E2EE',
+                  border: errors.institutionName ? '2px solid #FF6B35' : '1px solid #B8D4E8',
                   backgroundColor: '#FFFFFF',
-                  color: '#123C66',
-                  '--tw-ring-color': '#1F6FB2'
+                  color: '#0D3A5C',
+                  '--tw-ring-color': '#1E5A8A'
                 } as React.CSSProperties}
                 required
               />
               {errors.institutionName && (
-                <p className="mt-1 text-sm" style={{ color: '#E3B341' }}>{errors.institutionName}</p>
+                <p className="mt-1 text-sm" style={{ color: '#FF6B35' }}>{errors.institutionName}</p>
               )}
             </div>
 
             {/* District */}
             <div>
-              <label htmlFor="district" className="block text-sm font-medium mb-2" style={{ color: '#123C66' }}>
-                {t.district} <span style={{ color: '#E3B341' }}>*</span>
+              <label htmlFor="district" className="block text-sm font-medium mb-2" style={{ color: '#0D3A5C' }}>
+                {t.district} <span style={{ color: '#FF6B35' }}>*</span>
               </label>
               <select
                 id="district"
@@ -365,10 +365,10 @@ export default function Home() {
                 onChange={(e) => handleInputChange('district', e.target.value)}
                 className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
                 style={{
-                  border: errors.district ? '2px solid #E3B341' : '1px solid #D6E2EE',
+                  border: errors.district ? '2px solid #FF6B35' : '1px solid #B8D4E8',
                   backgroundColor: '#FFFFFF',
-                  color: '#123C66',
-                  '--tw-ring-color': '#1F6FB2'
+                  color: '#0D3A5C',
+                  '--tw-ring-color': '#1E5A8A'
                 } as React.CSSProperties}
                 required
               >
@@ -380,14 +380,14 @@ export default function Home() {
                 ))}
               </select>
               {errors.district && (
-                <p className="mt-1 text-sm" style={{ color: '#E3B341' }}>{errors.district}</p>
+                <p className="mt-1 text-sm" style={{ color: '#FF6B35' }}>{errors.district}</p>
               )}
             </div>
 
             {/* Form Error */}
             {errors._form && (
-              <div className="rounded-lg p-4" style={{ backgroundColor: '#F5F9FD', border: '1px solid #E3B341' }}>
-                <p className="text-sm" style={{ color: '#E3B341' }}>{errors._form}</p>
+              <div className="rounded-lg p-4" style={{ backgroundColor: '#F0F5F9', border: '1px solid #FF6B35' }}>
+                <p className="text-sm" style={{ color: '#FF6B35' }}>{errors._form}</p>
               </div>
             )}
 
@@ -396,7 +396,7 @@ export default function Home() {
               type="submit"
               disabled={isSubmitting}
               className="w-full text-white py-3 px-6 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-              style={{ backgroundColor: isSubmitting ? '#5DA9E9' : '#1F6FB2' }}
+              style={{ backgroundColor: isSubmitting ? '#4A90C2' : '#1E5A8A' }}
             >
               {isSubmitting ? t.generating : t.submit}
             </button>
@@ -406,13 +406,13 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t mt-12 py-6" style={{ backgroundColor: '#FFFFFF', borderColor: '#D6E2EE' }}>
+      <footer className="border-t mt-12 py-6" style={{ backgroundColor: '#FFFFFF', borderColor: '#B8D4E8' }}>
         <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
-          <p style={{ color: '#4A4A4A' }}>
-            {t.visitorCount}: <span className="font-bold" style={{ color: '#1F6FB2' }}>{visitorCount ?? '...'}</span>
+          <p style={{ color: '#2C3E50' }}>
+            {t.visitorCount}: <span className="font-bold" style={{ color: '#1E5A8A' }}>{visitorCount ?? '...'}</span>
           </p>
-          <p className="text-sm" style={{ color: '#4A4A4A' }}>
-            Admin Dashboard: <a href="/admin" className="underline font-medium" style={{ color: '#1F6FB2' }}>Click here</a>
+          <p className="text-sm" style={{ color: '#2C3E50' }}>
+            Admin Dashboard: <a href="/admin" className="underline font-medium" style={{ color: '#1E5A8A' }}>Click here</a>
           </p>
         </div>
       </footer>

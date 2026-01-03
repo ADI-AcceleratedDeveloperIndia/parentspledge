@@ -37,3 +37,6 @@ export const TELANGANA_DISTRICTS = [
 
 export type District = typeof TELANGANA_DISTRICTS[number];
 
+
+
+

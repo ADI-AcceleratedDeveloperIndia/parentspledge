@@ -18,254 +18,6 @@ export default function CertificateGenerator({ data, language }: CertificateGene
     generateCertificate();
   }, [data, language]);
 
-  const generateCertificate = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    setIsGenerating(true);
-
-    // Set canvas size for high-quality landscape certificate (MyGov style)
-    const width = 1920; // Landscape width
-    const height = 1080; // Landscape height
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Background - White
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, width, height);
-
-    // Decorative outer border (MyGov style - thick border with pattern)
-    const borderWidth = 12;
-    ctx.strokeStyle = '#123C66';
-    ctx.lineWidth = borderWidth;
-    ctx.strokeRect(borderWidth / 2, borderWidth / 2, width - borderWidth, height - borderWidth);
-
-    // Inner decorative border
-    ctx.strokeStyle = '#1F6FB2';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(30, 30, width - 60, height - 60);
-
-    // Decorative corner elements (MyGov style)
-    const cornerSize = 40;
-    ctx.strokeStyle = '#E3B341';
-    ctx.lineWidth = 3;
-    
-    // Top-left corner
-    ctx.beginPath();
-    ctx.moveTo(50, 50);
-    ctx.lineTo(50 + cornerSize, 50);
-    ctx.moveTo(50, 50);
-    ctx.lineTo(50, 50 + cornerSize);
-    ctx.stroke();
-    
-    // Top-right corner
-    ctx.beginPath();
-    ctx.moveTo(width - 50, 50);
-    ctx.lineTo(width - 50 - cornerSize, 50);
-    ctx.moveTo(width - 50, 50);
-    ctx.lineTo(width - 50, 50 + cornerSize);
-    ctx.stroke();
-    
-    // Bottom-left corner
-    ctx.beginPath();
-    ctx.moveTo(50, height - 50);
-    ctx.lineTo(50 + cornerSize, height - 50);
-    ctx.moveTo(50, height - 50);
-    ctx.lineTo(50, height - 50 - cornerSize);
-    ctx.stroke();
-    
-    // Bottom-right corner
-    ctx.beginPath();
-    ctx.moveTo(width - 50, height - 50);
-    ctx.lineTo(width - 50 - cornerSize, height - 50);
-    ctx.moveTo(width - 50, height - 50);
-    ctx.lineTo(width - 50, height - 50 - cornerSize);
-    ctx.stroke();
-
-    // Header section with logos (MyGov style - centered logos)
-    const logoY = 80;
-    const logoSize = 90;
-    const logoSpacing = 100;
-    const logoStartX = (width - (logoSize * 3 + logoSpacing * 2)) / 2;
-
-    // Logo 1 - Government emblem style
-    ctx.fillStyle = '#1F6FB2';
-    ctx.beginPath();
-    ctx.arc(logoStartX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#123C66';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('LOGO', logoStartX + logoSize / 2, logoY + logoSize / 2);
-
-    // Logo 2 - Center (main logo)
-    ctx.fillStyle = '#1F6FB2';
-    ctx.beginPath();
-    ctx.arc(logoStartX + logoSize + logoSpacing + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#E3B341';
-    ctx.lineWidth = 4;
-    ctx.stroke();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 16px Arial';
-    ctx.fillText('LOGO', logoStartX + logoSize + logoSpacing + logoSize / 2, logoY + logoSize / 2);
-
-    // Logo 3
-    ctx.fillStyle = '#1F6FB2';
-    ctx.beginPath();
-    ctx.arc(logoStartX + (logoSize + logoSpacing) * 2 + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#123C66';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText('LOGO', logoStartX + (logoSize + logoSpacing) * 2 + logoSize / 2, logoY + logoSize / 2);
-
-    // Decorative line under logos
-    ctx.strokeStyle = '#D6E2EE';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(150, logoY + logoSize + 20);
-    ctx.lineTo(width - 150, logoY + logoSize + 20);
-    ctx.stroke();
-
-    // Certificate Title - Large and prominent (MyGov style)
-    ctx.fillStyle = '#123C66';
-    ctx.font = 'bold 72px "Times New Roman", serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(t.certificateTitle, width / 2, logoY + logoSize + 100);
-
-    // Subtitle with decorative underline
-    ctx.fillStyle = '#1F6FB2';
-    ctx.font = 'bold 40px "Times New Roman", serif';
-    ctx.fillText(translations.en.subtitle, width / 2, logoY + logoSize + 150);
-    
-    // Decorative underline
-    ctx.strokeStyle = '#E3B341';
-    ctx.lineWidth = 3;
-    const subtitleWidth = ctx.measureText(translations.en.subtitle).width;
-    ctx.beginPath();
-    ctx.moveTo((width - subtitleWidth) / 2 - 20, logoY + logoSize + 165);
-    ctx.lineTo((width + subtitleWidth) / 2 + 20, logoY + logoSize + 165);
-    ctx.stroke();
-
-    // Certificate content section (MyGov formal style)
-    const contentY = logoY + logoSize + 220;
-    
-    // "This is to certify that" text
-    ctx.fillStyle = '#4A4A4A';
-    ctx.font = '32px "Times New Roman", serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(t.certificateSubtitle, width / 2, contentY);
-
-    // Name section - Prominent and bold
-    ctx.fillStyle = '#123C66';
-    ctx.font = 'bold 56px "Times New Roman", serif';
-    ctx.fillText(data.childName, width / 2, contentY + 70);
-
-    // Parent name - Secondary information
-    ctx.fillStyle = '#1F6FB2';
-    ctx.font = '36px "Times New Roman", serif';
-    ctx.fillText(`(${t.parentName}: ${data.parentName})`, width / 2, contentY + 130);
-
-    // Institution and District - Formal style
-    ctx.fillStyle = '#4A4A4A';
-    ctx.font = '30px "Times New Roman", serif';
-    ctx.fillText(`${t.institutionName}: ${data.institutionName}`, width / 2, contentY + 190);
-    ctx.fillText(`${t.district}: ${data.district}`, width / 2, contentY + 240);
-
-    // Decorative separator line
-    ctx.strokeStyle = '#D6E2EE';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(200, contentY + 280);
-    ctx.lineTo(width - 200, contentY + 280);
-    ctx.stroke();
-
-    // Pledge text - Formal italic style
-    ctx.fillStyle = '#123C66';
-    ctx.font = 'italic 26px "Times New Roman", serif';
-    const pledgeText = t.fullPledgeText;
-    const maxWidth = width - 300;
-    const lines = wrapText(ctx, pledgeText, maxWidth);
-    lines.forEach((line, index) => {
-      ctx.fillText(line, width / 2, contentY + 330 + index * 38);
-    });
-
-    // Certificate confirmation text
-    const pledgeEndY = contentY + 330 + lines.length * 38 + 40;
-    ctx.fillStyle = '#1F6FB2';
-    ctx.font = 'bold 32px "Times New Roman", serif';
-    ctx.fillText(t.certificateText, width / 2, pledgeEndY);
-
-    // Official signatures section (MyGov style - bottom)
-    const signatureY = height - 180;
-    const signatureSpacing = (width - 600) / 3;
-    const signatureWidth = 150;
-    const signatureHeight = 80;
-
-    // Signature 1 - CM
-    ctx.strokeStyle = '#D6E2EE';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(300, signatureY, signatureWidth, signatureHeight);
-    ctx.fillStyle = '#4A4A4A';
-    ctx.font = '14px "Times New Roman", serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('CM_PHOTO', 300 + signatureWidth / 2, signatureY + signatureHeight / 2);
-    ctx.fillText('Chief Minister', 300 + signatureWidth / 2, signatureY + signatureHeight + 20);
-
-    // Signature 2 - Transport Minister
-    ctx.strokeRect(300 + signatureSpacing, signatureY, signatureWidth, signatureHeight);
-    ctx.fillText('MINISTER_PHOTO', 300 + signatureSpacing + signatureWidth / 2, signatureY + signatureHeight / 2);
-    ctx.fillText('Transport Minister', 300 + signatureSpacing + signatureWidth / 2, signatureY + signatureHeight + 20);
-
-    // Signature 3 - Official
-    ctx.strokeRect(300 + signatureSpacing * 2, signatureY, signatureWidth, signatureHeight);
-    ctx.fillText('OFFICIAL_PHOTO', 300 + signatureSpacing * 2 + signatureWidth / 2, signatureY + signatureHeight / 2);
-    ctx.fillText('Official', 300 + signatureSpacing * 2 + signatureWidth / 2, signatureY + signatureHeight + 20);
-
-    // Official seal/stamp area (right side)
-    ctx.strokeStyle = '#E3B341';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(width - 200, signatureY + signatureHeight / 2, 50, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fillStyle = '#E3B341';
-    ctx.font = 'bold 12px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('SEAL', width - 200, signatureY + signatureHeight / 2);
-
-    // Date - Formal style
-    ctx.fillStyle = '#4A4A4A';
-    ctx.font = '24px "Times New Roman", serif';
-    ctx.textAlign = 'center';
-    const date = new Date().toLocaleDateString(language === 'te' ? 'te-IN' : 'en-IN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    ctx.fillText(`Date: ${date}`, width / 2, height - 40);
-
-    // Certificate number (MyGov style)
-    ctx.fillStyle = '#1F6FB2';
-    ctx.font = '18px Arial';
-    ctx.textAlign = 'left';
-    const certNumber = `CERT-${Date.now().toString().slice(-8)}`;
-    ctx.fillText(`Certificate No: ${certNumber}`, 100, height - 40);
-
-    setIsGenerating(false);
-  };
-
   const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
     const words = text.split(' ');
     const lines: string[] = [];
@@ -283,6 +35,198 @@ export default function CertificateGenerator({ data, language }: CertificateGene
     }
     lines.push(currentLine);
     return lines;
+  };
+
+  const loadImage = (src: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => {
+        console.warn(`Failed to load image: ${src}`);
+        reject(new Error(`Failed to load: ${src}`));
+      };
+      img.src = src;
+    });
+  };
+
+  const generateCertificate = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    setIsGenerating(true);
+
+    try {
+      // Load background image first to get its dimensions
+      const bgImage = await loadImage('/certificatedesign.png');
+      
+      // Use image dimensions for high-quality output (scale up 2x for better quality)
+      const scale = 2;
+      const width = bgImage.width * scale; // 1050 * 2 = 2100
+      const height = bgImage.height * scale; // 600 * 2 = 1200
+      
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      // Draw background image scaled up
+      ctx.drawImage(bgImage, 0, 0, width, height);
+
+      // Load all images in parallel
+      const [logo1, logo2, photo1, photo2] = await Promise.allSettled([
+        loadImage('/logos/logo1.png'),
+        loadImage('/logos/logo2.png'),
+        loadImage('/photos/1.png'),
+        loadImage('/photos/2.jpg'),
+      ]);
+
+      // Draw logos and photos
+      drawLogosAndPhotos(ctx, width, height, scale, logo1, logo2, photo1, photo2);
+
+      // Draw text content (adjusted to avoid overlaps)
+      drawTextContent(ctx, width, height, scale);
+
+      setIsGenerating(false);
+    } catch (error) {
+      console.error('Error generating certificate:', error);
+      // Fallback: draw basic certificate
+      const fallbackWidth = 2100;
+      const fallbackHeight = 1200;
+      canvas.width = fallbackWidth;
+      canvas.height = fallbackHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.fillStyle = '#E8F4F8';
+      ctx.fillRect(0, 0, fallbackWidth, fallbackHeight);
+      drawTextContent(ctx, fallbackWidth, fallbackHeight, 2);
+      setIsGenerating(false);
+    }
+  };
+
+  const drawLogosAndPhotos = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    scale: number,
+    logo1: PromiseSettledResult<HTMLImageElement>,
+    logo2: PromiseSettledResult<HTMLImageElement>,
+    photo1: PromiseSettledResult<HTMLImageElement>,
+    photo2: PromiseSettledResult<HTMLImageElement>
+  ) => {
+    const baseLogoSize = 50 * scale; // Base size for logo1 and small logo2
+    const logo2BigSize = baseLogoSize * 2; // Logo2 big version is double size
+    const photoSize = baseLogoSize; // Photos same size as small logos
+    const paddingPercent = 0.1; // 10% padding from edges
+    const horizontalPadding = width * paddingPercent;
+    const topY = 30 * scale; // Top edge position
+    const spacing = 20 * scale; // Spacing between elements
+
+    // LEFT SIDE: Logo1 and Logo2 (small) together
+    let currentX = horizontalPadding;
+    
+    if (logo1.status === 'fulfilled') {
+      ctx.drawImage(logo1.value, currentX, topY, baseLogoSize, baseLogoSize);
+      currentX += baseLogoSize + spacing;
+    }
+    
+    if (logo2.status === 'fulfilled') {
+      // Small logo2 on left
+      ctx.drawImage(logo2.value, currentX, topY, baseLogoSize, baseLogoSize);
+    }
+
+    // MIDDLE: Logo2 (big, double size) - centered
+    if (logo2.status === 'fulfilled') {
+      const logo2BigX = (width - logo2BigSize) / 2;
+      ctx.drawImage(logo2.value, logo2BigX, topY, logo2BigSize, logo2BigSize);
+    }
+
+    // RIGHT SIDE: Photo1 and Photo2 together
+    const rightStartX = width - horizontalPadding - (photoSize * 2) - spacing;
+    let photoX = rightStartX;
+    
+    if (photo1.status === 'fulfilled') {
+      ctx.drawImage(photo1.value, photoX, topY, photoSize, photoSize);
+      photoX += photoSize + spacing;
+    }
+    
+    if (photo2.status === 'fulfilled') {
+      ctx.drawImage(photo2.value, photoX, topY, photoSize, photoSize);
+    }
+  };
+
+  const drawTextContent = (ctx: CanvasRenderingContext2D, width: number, height: number, scale: number = 1) => {
+    const t = translations[language];
+    
+    // Calculate safe zones to avoid overlapping with logos/photos
+    const topSafeZone = 200 * scale; // Space for logos/photos at top
+    const leftSafeZone = 150 * scale; // Space for left logos
+    const rightSafeZone = 150 * scale; // Space for right photos
+    const bottomSafeZone = 80 * scale; // Space for date at bottom
+
+    // Certificate Title - centered, below top safe zone
+    ctx.fillStyle = '#0D3A5C';
+    ctx.font = `bold ${42 * scale}px "Times New Roman", serif`;
+    ctx.textAlign = 'center';
+    const titleY = topSafeZone + 40 * scale;
+    ctx.fillText(t.certificateTitle, width / 2, titleY);
+
+    // Subtitle
+    ctx.fillStyle = '#1E5A8A';
+    ctx.font = `bold ${26 * scale}px "Times New Roman", serif`;
+    ctx.fillText(translations.en.subtitle, width / 2, titleY + 50 * scale);
+
+    // Certificate content - "This is to certify that"
+    const contentY = titleY + 100 * scale;
+    ctx.fillStyle = '#0D3A5C';
+    ctx.font = `${22 * scale}px "Times New Roman", serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(t.certificateSubtitle, width / 2, contentY);
+
+    // Name section - prominent and bold
+    ctx.fillStyle = '#0D3A5C';
+    ctx.font = `bold ${36 * scale}px "Times New Roman", serif`;
+    const nameY = contentY + 50 * scale;
+    ctx.fillText(data.childName, width / 2, nameY);
+
+    // Parent name
+    ctx.fillStyle = '#1E5A8A';
+    ctx.font = `${22 * scale}px "Times New Roman", serif`;
+    ctx.fillText(`(${t.parentName}: ${data.parentName})`, width / 2, nameY + 40 * scale);
+
+    // Institution and District
+    ctx.fillStyle = '#0D3A5C';
+    ctx.font = `${18 * scale}px "Times New Roman", serif`;
+    ctx.fillText(`${t.institutionName}: ${data.institutionName}`, width / 2, nameY + 80 * scale);
+    ctx.fillText(`${t.district}: ${data.district}`, width / 2, nameY + 110 * scale);
+
+    // Pledge text - smaller, italic, with proper wrapping
+    ctx.fillStyle = '#0D3A5C';
+    ctx.font = `italic ${16 * scale}px "Times New Roman", serif`;
+    const pledgeText = t.fullPledgeText;
+    const maxWidth = width - leftSafeZone - rightSafeZone;
+    const lines = wrapText(ctx, pledgeText, maxWidth);
+    const pledgeStartY = nameY + 150 * scale;
+    lines.forEach((line, index) => {
+      ctx.fillText(line, width / 2, pledgeStartY + index * 22 * scale);
+    });
+
+    // Certificate confirmation text
+    const pledgeEndY = pledgeStartY + lines.length * 22 * scale + 30 * scale;
+    ctx.fillStyle = '#1E5A8A';
+    ctx.font = `bold ${20 * scale}px "Times New Roman", serif`;
+    ctx.fillText(t.certificateText, width / 2, pledgeEndY);
+
+    // Date - at bottom, above bottom safe zone
+    ctx.fillStyle = '#2C3E50';
+    ctx.font = `${16 * scale}px "Times New Roman", serif`;
+    const date = new Date().toLocaleDateString(language === 'te' ? 'te-IN' : 'en-IN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    ctx.fillText(`Date: ${date}`, width / 2, height - bottomSafeZone);
   };
 
   const downloadCertificate = () => {
@@ -308,15 +252,15 @@ export default function CertificateGenerator({ data, language }: CertificateGene
     <div className="w-full">
       <div className="mb-6 text-center space-y-4">
         <div>
-          <h2 className="text-2xl font-bold mb-2" style={{ color: '#123C66' }}>Your Certificate is Ready!</h2>
-          <p style={{ color: '#4A4A4A' }}>Download your Road Safety Pledge Certificate</p>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: '#0D3A5C' }}>Your Certificate is Ready!</h2>
+          <p style={{ color: '#2C3E50' }}>Download your Road Safety Pledge Certificate</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
             onClick={downloadCertificate}
             disabled={isGenerating}
             className="flex items-center gap-2 px-8 py-4 text-white font-semibold text-lg rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-lg"
-            style={{ backgroundColor: isGenerating ? '#5DA9E9' : '#1F6FB2' }}
+            style={{ backgroundColor: isGenerating ? '#4A90C2' : '#1E5A8A' }}
           >
             {isGenerating ? (
               <>
@@ -339,8 +283,8 @@ export default function CertificateGenerator({ data, language }: CertificateGene
             onClick={() => window.print()}
             className="flex items-center gap-2 px-6 py-4 font-semibold rounded-lg border-2 transition-opacity"
             style={{ 
-              borderColor: '#1F6FB2',
-              color: '#1F6FB2',
+              borderColor: '#1E5A8A',
+              color: '#1E5A8A',
               backgroundColor: '#FFFFFF'
             }}
           >
@@ -351,16 +295,20 @@ export default function CertificateGenerator({ data, language }: CertificateGene
           </button>
         </div>
       </div>
-      <div className="w-full overflow-auto rounded-lg p-4 shadow-lg" style={{ backgroundColor: '#F5F9FD', border: '2px solid #D6E2EE' }}>
-        <div className="inline-block">
+      <div className="w-full overflow-x-auto rounded-lg p-2 sm:p-4 shadow-lg" style={{ backgroundColor: '#F0F5F9', border: '2px solid #B8D4E8' }}>
+        <div className="inline-block min-w-full">
           <canvas
             ref={canvasRef}
-            className="max-w-full h-auto"
-            style={{ maxHeight: '70vh' }}
+            className="w-full h-auto"
+            style={{ 
+              maxHeight: '85vh',
+              display: 'block',
+              margin: '0 auto',
+              maxWidth: '100%'
+            }}
           />
         </div>
       </div>
     </div>
   );
 }
-

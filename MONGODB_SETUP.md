@@ -45,3 +45,6 @@ git push origin main
 - The application will automatically create collections (`pledges` and `visitors`) when needed
 - Admin dashboard accepts any password for development purposes
 
+
+
+

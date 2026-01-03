@@ -1,29 +1,38 @@
 @import "tailwindcss";
 
 :root {
-  /* Telangana Transport Department Color Palette */
-  --primary-blue: #1F6FB2;
-  --navy-blue: #123C66;
-  --sky-blue: #5DA9E9;
+  /* Telangana Rising 2047 Logo Color Palette */
+  --primary-blue: #1E5A8A; /* Medium blue from logo */
+  --navy-blue: #0D3A5C; /* Dark navy blue from solid "1" */
+  --sky-blue: #4A90C2; /* Light blue from logo */
+  --purple-blue: #6B8BC4; /* Purplish-blue from logo gradients */
+  --sunrise-orange: #FF6B35; /* Orange from sunrise */
+  --sunrise-yellow: #FFB347; /* Yellow from sunrise */
+  --sunrise-red: #FF4500; /* Red-orange from sunrise */
+  --logo-red: #DC143C; /* Bright red from "RISING" and "2047" bands */
   --background-white: #FFFFFF;
-  --section-bg: #F5F9FD;
-  --border-color: #D6E2EE;
-  --emblem-gold: #E3B341;
-  --footer-grey: #4A4A4A;
+  --section-bg: #F0F5F9; /* Light blue-tinted background */
+  --border-color: #B8D4E8; /* Light blue border */
+  --accent-gold: #FFA500; /* Orange-gold accent */
+  --footer-grey: #2C3E50; /* Darker grey */
   
   /* Legacy variables for compatibility */
   --background: #FFFFFF;
-  --foreground: #123C66;
+  --foreground: #0D3A5C;
 }
 
 @theme inline {
   --color-primary-blue: var(--primary-blue);
   --color-navy-blue: var(--navy-blue);
   --color-sky-blue: var(--sky-blue);
+  --color-purple-blue: var(--purple-blue);
+  --color-sunrise-orange: var(--sunrise-orange);
+  --color-sunrise-yellow: var(--sunrise-yellow);
+  --color-logo-red: var(--logo-red);
   --color-background: var(--background-white);
   --color-section-bg: var(--section-bg);
   --color-border: var(--border-color);
-  --color-emblem-gold: var(--emblem-gold);
+  --color-accent-gold: var(--accent-gold);
   --color-footer-grey: var(--footer-grey);
   --color-foreground: var(--navy-blue);
   --font-sans: var(--font-geist-sans);
@@ -39,5 +48,5 @@ body {
 
 /* Ensure sufficient contrast for mobile readability */
 button, a {
-  -webkit-tap-highlight-color: rgba(31, 111, 178, 0.2);
+  -webkit-tap-highlight-color: rgba(30, 90, 138, 0.2);
 }

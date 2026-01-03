@@ -42,7 +42,7 @@ export default function AudioGuide({ language, text }: AudioGuideProps) {
     <button
       onClick={isPlaying ? stopAudio : playAudio}
       className="flex items-center gap-2 rounded-lg px-4 py-2 text-white text-sm font-medium transition-opacity"
-      style={{ backgroundColor: '#5DA9E9' }}
+      style={{ backgroundColor: '#4A90C2' }}
       aria-label="Audio Guide"
     >
       <svg
