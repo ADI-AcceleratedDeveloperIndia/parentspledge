@@ -27,17 +27,24 @@ export async function GET(request: NextRequest) {
       // Total pledges
       totalPledges = await collection.countDocuments({});
 
-      // Total downloads (sum of all downloadCount fields)
-      // Also count pledges that have been downloaded at least once
+      // Total downloads logic:
+      // - Every pledge gets at least 1 download (certificate shown on submission)
+      // - Additional downloads are tracked via downloadCount
+      // - So totalDownloads = totalPledges + sum of additional downloads (downloadCount - 1)
       const downloadStats = await collection
         .aggregate([
           {
             $group: {
               _id: null,
-              totalDownloads: { $sum: { $ifNull: ['$downloadCount', 0] } },
-              pledgesWithDownloads: {
+              totalPledges: { $sum: 1 },
+              // Sum of (downloadCount - 1) for additional downloads beyond the initial one
+              additionalDownloads: {
                 $sum: {
-                  $cond: [{ $gt: [{ $ifNull: ['$downloadCount', 0] }, 0] }, 1, 0]
+                  $cond: [
+                    { $gt: [{ $ifNull: ['$downloadCount', 0] }, 0] },
+                    { $subtract: [{ $ifNull: ['$downloadCount', 0] }, 1] },
+                    0
+                  ]
                 }
               }
             },
@@ -45,8 +52,10 @@ export async function GET(request: NextRequest) {
         ])
         .toArray();
       
-      totalDownloads = downloadStats[0]?.totalDownloads || 0;
-      console.log(`Analytics: Total downloads = ${totalDownloads}, Pledges with downloads = ${downloadStats[0]?.pledgesWithDownloads || 0}`);
+      // Total downloads = every pledge (1 download each) + additional downloads
+      const stats = downloadStats[0] || {};
+      totalDownloads = (stats.totalPledges || 0) + (stats.additionalDownloads || 0);
+      console.log(`Analytics: Total pledges = ${stats.totalPledges || 0}, Additional downloads = ${stats.additionalDownloads || 0}, Total downloads = ${totalDownloads}`);
 
       // District-wise analytics
       districtStats = await collection
