@@ -146,18 +146,29 @@ export default function CertificateGenerator({ data, language, referenceId, cert
       ctx.drawImage(logo2.value, logo2BigX, topY, logo2BigSize, logo2BigSize);
     }
 
-    // RIGHT SIDE: Photo1 and Photo2 (same size as Logo1, Logo3) together
+    // RIGHT SIDE: Photo1 and Photo2 (same size as Logo1, Logo3) together - ROUNDED
     const rightStartX = width - horizontalPadding - (smallSize * 2) - spacing;
     let photoX = rightStartX;
     
     if (photo1.status === 'fulfilled') {
+      // Draw rounded photo (circle)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(photoX + smallSize / 2, topY + smallSize / 2, smallSize / 2, 0, Math.PI * 2);
+      ctx.clip();
       ctx.drawImage(photo1.value, photoX, topY, smallSize, smallSize);
+      ctx.restore();
       photoX += smallSize + spacing;
     }
     
     if (photo2.status === 'fulfilled') {
-      // Photo2 same size as Photo1, Logo1, Logo3
+      // Draw rounded photo (circle)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(photoX + smallSize / 2, topY + smallSize / 2, smallSize / 2, 0, Math.PI * 2);
+      ctx.clip();
       ctx.drawImage(photo2.value, photoX, topY, smallSize, smallSize);
+      ctx.restore();
     }
   };
 
@@ -203,10 +214,16 @@ export default function CertificateGenerator({ data, language, referenceId, cert
       ctx.fillText(line, width / 2, pledgeStartY + index * 24 * scale);
     });
 
-    // Date, District, and Certificate Number - All aligned on same line
+    // Date, District, and Certificate Number - All aligned on same line (no labels)
     const detailsY = pledgeStartY + pledgeLines.length * 24 * scale + 40 * scale;
     
-    // Date - Left aligned
+    // Calculate spacing to prevent overlap
+    const leftMargin = leftSafeZone;
+    const rightMargin = width - rightSafeZone;
+    const centerX = width / 2;
+    const spacing = (rightMargin - leftMargin) / 3; // Divide space into 3 equal parts
+    
+    // Date - Left aligned (no "Date:" label)
     ctx.fillStyle = '#2C3E50';
     ctx.font = `${18 * scale}px "Times New Roman", serif`;
     ctx.textAlign = 'left';
@@ -215,19 +232,19 @@ export default function CertificateGenerator({ data, language, referenceId, cert
       month: 'long',
       day: 'numeric',
     });
-    ctx.fillText(`Date: ${date}`, leftSafeZone, detailsY);
+    ctx.fillText(date, leftMargin, detailsY);
 
-    // District - Center aligned
+    // District - Center aligned (no "District:" label)
     ctx.fillStyle = '#0D3A5C';
     ctx.font = `${20 * scale}px "Times New Roman", serif`;
     ctx.textAlign = 'center';
-    ctx.fillText(`${t.district}: ${data.district}`, width / 2, detailsY);
+    ctx.fillText(data.district, centerX, detailsY);
 
-    // Certificate Number - Right aligned
+    // Certificate Number - Right aligned, moved further right (no "Cert No.:" label)
     ctx.fillStyle = '#1E5A8A';
     ctx.font = `bold ${18 * scale}px "Courier New", monospace`;
     ctx.textAlign = 'right';
-    ctx.fillText(`Cert No.: ${certificateNumber || 'N/A'}`, width - rightSafeZone, detailsY);
+    ctx.fillText(certificateNumber || 'N/A', rightMargin - 20 * scale, detailsY);
     
     // Reset text alignment to center for other text
     ctx.textAlign = 'center';
