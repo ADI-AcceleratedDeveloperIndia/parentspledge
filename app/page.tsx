@@ -54,8 +54,15 @@ export default function Home() {
                 // Already downloaded - don't show form
                 setShowCertificate(false);
               } else {
-                // Not downloaded yet - show form to allow download
-                setSubmittedData(data.pledge);
+                // Not downloaded yet - show certificate to allow download
+                setSubmittedData({
+                  childName: data.pledge.childName,
+                  parentName: data.pledge.parentName,
+                  institutionName: data.pledge.institutionName,
+                  standard: data.pledge.standard,
+                  district: data.pledge.district,
+                  language: data.pledge.language || 'en',
+                });
                 setShowCertificate(true);
               }
             }
