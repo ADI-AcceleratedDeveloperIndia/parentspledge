@@ -332,7 +332,9 @@ export default function AdminDashboard() {
           <div className="rounded-lg p-6" style={{ backgroundColor: '#FFFFFF', border: '1px solid #B8D4E8' }}>
             <h2 className="text-xl font-semibold mb-4" style={{ color: '#0D3A5C' }}>Peak Time Analysis</h2>
             <p className="text-lg" style={{ color: '#2C3E50' }}>
-              Peak hour: <span className="font-bold" style={{ color: '#1E5A8A' }}>{analytics.peakHour}:00</span>
+              Peak hour: <span className="font-bold" style={{ color: '#1E5A8A' }}>
+                {analytics.peakHour !== null ? `${String(analytics.peakHour).padStart(2, '0')}:00 IST` : 'N/A'}
+              </span>
             </p>
           </div>
         )}

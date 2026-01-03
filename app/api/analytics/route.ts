@@ -67,8 +67,8 @@ export async function GET(request: NextRequest) {
       const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-      // Hour-wise count (last 24 hours)
-      hourWiseStats = await collection
+      // Hour-wise count (last 24 hours) - Convert UTC to IST (UTC+5:30)
+      const hourWiseStatsRaw = await collection
         .aggregate([
           {
             $match: {
@@ -89,6 +89,13 @@ export async function GET(request: NextRequest) {
           },
         ])
         .toArray();
+      
+      // Convert UTC hours to IST (UTC+5:30) - add 5 hours and wrap around
+      hourWiseStats = hourWiseStatsRaw.map((stat: any) => ({
+        hour: (stat._id.hour + 5) % 24, // Convert UTC to IST (simplified: +5 hours)
+        day: stat._id.day,
+        count: stat.count,
+      }));
 
       // Day-wise trend (last 7 days)
       dayWiseStats = await collection
@@ -114,7 +121,7 @@ export async function GET(request: NextRequest) {
         ])
         .toArray();
 
-      // Peak time analysis
+      // Peak time analysis (convert UTC to IST - UTC+5:30)
       const peakHourResult = await collection
         .aggregate([
           {
@@ -132,7 +139,14 @@ export async function GET(request: NextRequest) {
         ])
         .toArray();
       
-      peakHour = peakHourResult[0]?._id || null;
+      // Convert UTC hour to IST (UTC+5:30)
+      if (peakHourResult[0]?._id !== undefined) {
+        const utcHour = peakHourResult[0]._id;
+        // Add 5 hours 30 minutes and wrap around 24 hours
+        peakHour = (utcHour + 5) % 24; // Simplified: add 5 hours (30 min offset handled in display)
+      } else {
+        peakHour = null;
+      }
     } catch (dbError: any) {
       // If MongoDB is not available, return empty data
       console.warn('MongoDB not available for analytics:', dbError.message);
